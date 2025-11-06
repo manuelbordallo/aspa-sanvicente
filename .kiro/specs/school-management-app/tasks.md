@@ -71,13 +71,13 @@
     - Implementar guardado y actualización de lista
     - _Requisitos: 3.4, 3.5_
 
-- [ ] 7. Desarrollar vista de avisos
-  - [ ] 7.1 Crear NoticesView para avisos del usuario
+- [x] 7. Desarrollar vista de avisos
+  - [x] 7.1 Crear NoticesView para avisos del usuario
     - Mostrar avisos no leídos del usuario logueado
     - Implementar funcionalidad "marcar como leído"
     - Agregar indicadores visuales para avisos no leídos
     - _Requisitos: 4.1, 4.4_
-  - [ ] 7.2 Implementar creación de avisos
+  - [x] 7.2 Implementar creación de avisos
     - Crear formulario para nuevo aviso
     - Implementar selector de destinatarios (usuarios/grupos)
     - Agregar validación y envío de avisos
