@@ -14,18 +14,18 @@
   - Crear tipos para respuestas de API y estados de error
   - _Requisitos: 7.5, 8.4, 4.5, 5.5_
 
-- [-] 3. Crear servicios fundamentales
-  - [-] 3.1 Implementar ApiClient con interceptors y manejo de errores
+- [x] 3. Crear servicios fundamentales
+  - [x] 3.1 Implementar ApiClient con interceptors y manejo de errores
     - Crear clase ApiClient con métodos HTTP básicos
     - Implementar interceptors para tokens JWT
     - Agregar manejo centralizado de errores de API
     - _Requisitos: 1.1, 1.3_
-  - [ ] 3.2 Implementar AuthService para autenticación
+  - [x] 3.2 Implementar AuthService para autenticación
     - Crear servicio de autenticación con login/logout
     - Implementar validación de tokens y roles
     - Agregar persistencia de sesión en localStorage
     - _Requisitos: 1.1, 1.2, 1.4, 1.5_
-  - [ ] 3.3 Crear servicios específicos para cada entidad
+  - [x] 3.3 Crear servicios específicos para cada entidad
     - Implementar NewsService para gestión de noticias
     - Implementar NoticeService para gestión de avisos
     - Implementar CalendarService para eventos

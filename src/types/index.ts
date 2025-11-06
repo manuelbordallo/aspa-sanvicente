@@ -4,6 +4,7 @@ export interface User {
   lastName: string;
   email: string;
   role: UserRole;
+  isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -133,6 +134,7 @@ export interface UserFormData {
   lastName: string;
   email: string;
   role: UserRole;
+  isActive?: boolean;
 }
 
 export interface PasswordChangeData {
