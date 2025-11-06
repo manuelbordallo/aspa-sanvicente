@@ -83,13 +83,13 @@
     - Agregar validación y envío de avisos
     - _Requisitos: 4.2, 4.3, 4.5_
 
-- [ ] 8. Desarrollar vista de calendario
-  - [ ] 8.1 Crear CalendarView con visualización mensual
+- [x] 8. Desarrollar vista de calendario
+  - [x] 8.1 Crear CalendarView con visualización mensual
     - Implementar calendario con eventos marcados
     - Agregar navegación entre meses
     - Mostrar eventos en fechas correspondientes
     - _Requisitos: 5.1, 5.4_
-  - [ ] 8.2 Implementar detalles y gestión de eventos
+  - [x] 8.2 Implementar detalles y gestión de eventos
     - Crear modal de detalle de evento al hacer clic
     - Mostrar título, descripción, fecha y autor
     - Agregar formulario de creación de eventos (solo admin)
