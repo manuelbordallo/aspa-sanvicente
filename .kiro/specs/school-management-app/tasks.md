@@ -59,13 +59,13 @@
   - Implementar sistema de temas (claro/oscuro/sistema)
   - _Requisitos: 2.2, 2.5, 1.5, 6.1_
 
-- [ ] 6. Desarrollar vista de noticias
-  - [ ] 6.1 Crear NewsView para listado de noticias
+- [x] 6. Desarrollar vista de noticias
+  - [x] 6.1 Crear NewsView para listado de noticias
     - Implementar listado con título, fecha, autor y resumen
     - Agregar paginación o scroll infinito
     - Implementar vista detallada de noticia
     - _Requisitos: 3.1, 3.2, 3.3_
-  - [ ] 6.2 Implementar creación de noticias (solo admin)
+  - [x] 6.2 Implementar creación de noticias (solo admin)
     - Crear formulario de nueva noticia
     - Agregar validación de permisos de administrador
     - Implementar guardado y actualización de lista
