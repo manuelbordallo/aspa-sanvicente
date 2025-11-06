@@ -7,15 +7,15 @@
   - Configurar herramientas de desarrollo (ESLint, Prettier, testing)
   - _Requisitos: 9.1, 9.2, 9.4_
 
-- [ ] 2. Implementar tipos de datos y interfaces base
+- [x] 2. Implementar tipos de datos y interfaces base
   - Crear interfaces TypeScript para User, News, Notice, CalendarEvent
   - Definir tipos para UserRole, Theme, AppSettings
   - Implementar validadores de datos (email, password)
   - Crear tipos para respuestas de API y estados de error
   - _Requisitos: 7.5, 8.4, 4.5, 5.5_
 
-- [ ] 3. Crear servicios fundamentales
-  - [ ] 3.1 Implementar ApiClient con interceptors y manejo de errores
+- [-] 3. Crear servicios fundamentales
+  - [-] 3.1 Implementar ApiClient con interceptors y manejo de errores
     - Crear clase ApiClient con métodos HTTP básicos
     - Implementar interceptors para tokens JWT
     - Agregar manejo centralizado de errores de API
