@@ -6,6 +6,9 @@ export type { RequestConfig, Interceptor } from './api-client.js';
 export { AuthService, authService } from './auth-service.js';
 export type { AuthState } from './auth-service.js';
 
+// Theme Service
+export { ThemeService, themeService } from './theme-service.js';
+
 // Entity Services
 export { NewsService, newsService } from './news-service.js';
 export type { NewsFilters, NewsPaginationOptions } from './news-service.js';

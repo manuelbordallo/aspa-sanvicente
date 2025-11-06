@@ -51,7 +51,7 @@
     - Crear EventForm para eventos de calendario
     - _Requisitos: 1.1, 3.4, 4.2, 5.3_
 
-- [ ] 5. Implementar App Shell y routing
+- [x] 5. Implementar App Shell y routing
   - Crear componente principal SchoolApp
   - Configurar router con @lit-labs/router
   - Implementar guards de autenticación para rutas
