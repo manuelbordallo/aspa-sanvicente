@@ -32,19 +32,19 @@
     - Implementar UserService para gestión de usuarios
     - _Requisitos: 3.1, 4.2, 5.3, 8.2_
 
-- [ ] 4. Desarrollar componentes base de UI
-  - [ ] 4.1 Crear componentes básicos reutilizables
+- [x] 4. Desarrollar componentes base de UI
+  - [x] 4.1 Crear componentes básicos reutilizables
     - Implementar UIButton con variantes y estados
     - Crear UICard para contenedores de contenido
     - Implementar UIInput para formularios
     - Crear UIModal para diálogos
     - _Requisitos: 9.3, 9.5_
-  - [ ] 4.2 Implementar sistema de navegación
+  - [x] 4.2 Implementar sistema de navegación
     - Crear AppNavigation con iconos y rutas
     - Implementar navegación responsive (mobile/desktop)
     - Agregar separación visual para configuración y usuario
     - _Requisitos: 2.1, 2.3, 2.4_
-  - [ ] 4.3 Crear componentes de formulario
+  - [x] 4.3 Crear componentes de formulario
     - Implementar LoginForm con validación
     - Crear NewsForm para crear/editar noticias
     - Implementar NoticeForm para crear avisos
