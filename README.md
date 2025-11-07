@@ -29,15 +29,34 @@ src/
 
 ## Scripts Disponibles
 
+### Desarrollo
+
 - `npm run dev` - Inicia el servidor de desarrollo
-- `npm run build` - Construye la aplicación para producción
 - `npm run preview` - Previsualiza la build de producción
+
+### Build
+
+- `npm run build` - Construye la aplicación para producción
+- `npm run build:prod` - Build optimizado para producción
+- `npm run build:clean` - Limpia el directorio dist
+- `npm run build:analyze` - Analiza el tamaño del bundle
+
+### Calidad de Código
+
 - `npm run lint` - Ejecuta ESLint
 - `npm run lint:fix` - Ejecuta ESLint y corrige errores automáticamente
 - `npm run format` - Formatea el código con Prettier
 - `npm run format:check` - Verifica el formato del código
-- `npm run test` - Ejecuta los tests
+- `npm run validate` - Ejecuta lint, format, test y build
+
+### Testing
+
+- `npm run test` - Ejecuta los tests con cobertura
 - `npm run test:watch` - Ejecuta los tests en modo watch
+- `npm run test:ci` - Ejecuta tests para CI/CD
+
+### Deployment
+
 - `npm run deploy` - Despliega automáticamente a GitHub
 - `npm run deploy:msg "mensaje"` - Despliega con mensaje personalizado
 
@@ -57,9 +76,40 @@ src/
 
 3. Abrir [http://localhost:3000](http://localhost:3000) en el navegador
 
-## Despliegue
+## Build y Despliegue
 
-Para desplegar automáticamente los cambios a GitHub:
+### Variables de Entorno
+
+1. Copiar el archivo de ejemplo:
+
+   ```bash
+   cp .env.example .env
+   ```
+
+2. Configurar las variables necesarias:
+   ```bash
+   VITE_API_BASE_URL=https://your-api.com/api
+   ```
+
+### Build para Producción
+
+```bash
+# Build optimizado
+npm run build:prod
+
+# Previsualizar build
+npm run preview
+```
+
+### Despliegue
+
+#### GitHub Pages (Automático)
+
+- Push a la rama `main`
+- GitHub Actions construye y despliega automáticamente
+- Acceso en: `https://username.github.io/repository`
+
+#### Script de Despliegue
 
 ```bash
 # Despliegue básico
@@ -69,7 +119,26 @@ npm run deploy
 npm run deploy:msg "Descripción de los cambios"
 ```
 
-Ver [DEPLOYMENT.md](./DEPLOYMENT.md) para instrucciones detalladas de configuración.
+#### Docker
+
+```bash
+# Construir y ejecutar
+docker-compose up -d
+
+# Acceder en http://localhost:8080
+```
+
+#### Otras Plataformas
+
+- **Netlify**: Build `npm run build:prod`, Publish `dist`
+- **Vercel**: Framework Vite, Build `npm run build:prod`, Output `dist`
+- **Servidor tradicional**: Subir contenido de `dist/` y configurar SPA routing
+
+Ver documentación detallada:
+
+- [BUILD.md](./BUILD.md) - Guía completa de build y optimización
+- [DEPLOYMENT.md](./DEPLOYMENT.md) - Instrucciones detalladas de despliegue
+- [QUICK_DEPLOY.md](./QUICK_DEPLOY.md) - Guía rápida de despliegue
 
 ## Testing
 

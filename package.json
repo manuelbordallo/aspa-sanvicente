@@ -5,7 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
+    "build": "npm run build:clean && tsc && vite build",
+    "build:clean": "rm -rf dist",
+    "build:prod": "npm run build:clean && tsc && vite build --mode production",
+    "build:analyze": "npm run build -- --mode analyze",
     "preview": "vite preview",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "lint:fix": "eslint . --ext ts,tsx --fix",
@@ -13,8 +16,11 @@
     "format:check": "prettier --check .",
     "test": "web-test-runner --coverage",
     "test:watch": "web-test-runner --watch",
+    "test:ci": "web-test-runner --coverage --node-resolve",
     "deploy": "./scripts/deploy.sh",
-    "deploy:msg": "./scripts/deploy.sh"
+    "deploy:msg": "./scripts/deploy.sh",
+    "deploy:prod": "./scripts/build-production.sh",
+    "validate": "npm run lint && npm run format:check && npm run test && npm run build"
   },
   "devDependencies": {
     "@esm-bundle/chai": "^4.3.4",
@@ -31,6 +37,7 @@
     "postcss": "^8.4.31",
     "prettier": "^3.0.0",
     "tailwindcss": "^3.3.5",
+    "terser": "^5.44.1",
     "typescript": "^5.0.2",
     "vite": "^4.4.5"
   },

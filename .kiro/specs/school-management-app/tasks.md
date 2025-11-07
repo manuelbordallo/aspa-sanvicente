@@ -162,7 +162,7 @@
     - Verificar funcionalidades principales de cada vista
     - _Requisitos: 1.1, 2.5, 3.1_
 
-- [ ] 16. Configurar build y deployment
+- [x] 16. Configurar build y deployment
   - Configurar build de producción con Vite
   - Optimizar bundle size y performance
   - Configurar variables de entorno

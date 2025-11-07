@@ -1,4 +1,5 @@
 import type { ApiResponse, ApiError } from '../types/index.js';
+import { config } from '../config/index.js';
 
 export interface RequestConfig extends RequestInit {
   timeout?: number;
@@ -13,11 +14,12 @@ export interface Interceptor {
 
 export class ApiClient {
   private baseURL: string;
-  private defaultTimeout: number = 10000;
+  private defaultTimeout: number;
   private interceptors: Interceptor[] = [];
 
-  constructor(baseURL: string = '/api') {
-    this.baseURL = baseURL;
+  constructor(baseURL?: string, timeout?: number) {
+    this.baseURL = baseURL || config.api.baseUrl;
+    this.defaultTimeout = timeout || config.api.timeout;
     this.setupDefaultInterceptors();
   }
 
@@ -42,15 +44,15 @@ export class ApiClient {
   private setupDefaultInterceptors(): void {
     // JWT Token interceptor
     this.addInterceptor({
-      request: (config: RequestConfig) => {
-        const token = localStorage.getItem('auth_token');
+      request: (requestConfig: RequestConfig) => {
+        const token = localStorage.getItem(config.auth.tokenKey);
         if (token) {
-          config.headers = {
-            ...config.headers,
+          requestConfig.headers = {
+            ...requestConfig.headers,
             Authorization: `Bearer ${token}`,
           };
         }
-        return config;
+        return requestConfig;
       },
     });
 
@@ -59,7 +61,7 @@ export class ApiClient {
       error: async (error: Error) => {
         if (error.message.includes('401')) {
           // Token expired or invalid - clear auth and redirect
-          localStorage.removeItem('auth_token');
+          localStorage.removeItem(config.auth.tokenKey);
           window.dispatchEvent(new CustomEvent('auth:logout'));
         }
         return error;
