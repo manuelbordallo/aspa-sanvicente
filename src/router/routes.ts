@@ -109,11 +109,44 @@ export class RouteGuard {
     }
 
     if (route.allowedRoles && !this.canActivate(route)) {
+      // Dispatch event for unauthorized access
+      window.dispatchEvent(
+        new CustomEvent('route:unauthorized', {
+          detail: {
+            attemptedRoute: route.path,
+            requiredRoles: route.allowedRoles,
+          },
+        })
+      );
+
       // Redirect to home if user doesn't have permission
       return '/';
     }
 
     return route.path;
+  }
+
+  /**
+   * Check if current user can access a specific route by path
+   */
+  static canAccessPath(path: string): boolean {
+    const route = routes.find((r) => r.path === path);
+    if (!route) return false;
+    return this.canActivate(route);
+  }
+
+  /**
+   * Check if current user has a specific role
+   */
+  static hasRole(role: UserRole): boolean {
+    return authService.hasRole(role);
+  }
+
+  /**
+   * Check if current user is authenticated
+   */
+  static isAuthenticated(): boolean {
+    return authService.isAuthenticated();
   }
 }
 
@@ -141,7 +174,10 @@ export class SimpleRouter {
       if (!RouteGuard.canActivate(route)) {
         const redirectPath = RouteGuard.getRedirectPath(route);
         if (redirectPath !== route.path) {
-          this.navigate(redirectPath);
+          // Prevent infinite redirect loop
+          if (window.location.pathname !== redirectPath) {
+            this.navigate(redirectPath);
+          }
           return;
         }
       }
@@ -155,10 +191,14 @@ export class SimpleRouter {
     } else {
       // Default to news if route not found and authenticated
       if (authService.isAuthenticated()) {
-        this.navigate('/news');
+        if (window.location.pathname !== '/news') {
+          this.navigate('/news');
+        }
         return;
       } else {
-        this.navigate('/login');
+        if (window.location.pathname !== '/login') {
+          this.navigate('/login');
+        }
         return;
       }
     }

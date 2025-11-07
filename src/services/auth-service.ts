@@ -58,6 +58,11 @@ export class AuthService {
         this.handleLogout();
       }
     });
+
+    // Listen for token expiration
+    window.addEventListener('auth:token-expired', () => {
+      this.handleLogout();
+    });
   }
 
   /**

@@ -119,13 +119,13 @@
   - Mostrar información completa de cada usuario
   - _Requisitos: 8.1, 8.2, 8.3, 8.4, 8.5_
 
-- [ ] 12. Implementar sistema de autenticación completo
-  - [ ] 12.1 Crear página de login
+- [x] 12. Implementar sistema de autenticación completo
+  - [x] 12.1 Crear página de login
     - Implementar formulario de login con validación
     - Agregar manejo de errores de autenticación
     - Implementar redirección después del login exitoso
     - _Requisitos: 1.1, 1.2_
-  - [ ] 12.2 Integrar guards de autenticación
+  - [x] 12.2 Integrar guards de autenticación
     - Implementar protección de rutas según roles
     - Agregar redirección automática a login si no autenticado
     - Validar permisos en cada vista según tipo de usuario

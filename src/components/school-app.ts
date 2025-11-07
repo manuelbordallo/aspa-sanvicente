@@ -331,6 +331,9 @@ export class SchoolApp extends LitElement {
     // Setup resize observer for mobile detection
     this.setupResizeObserver();
 
+    // Setup route guards listener
+    this.setupRouteGuardsListener();
+
     // Initialize router
     this.initializeRouter();
 
@@ -366,6 +369,23 @@ export class SchoolApp extends LitElement {
 
   private setupAuthListener(): void {
     authService.addAuthStateListener(this.handleAuthStateChange.bind(this));
+  }
+
+  private setupRouteGuardsListener(): void {
+    // Listen for unauthorized route access attempts
+    window.addEventListener('route:unauthorized', ((event: CustomEvent) => {
+      const { requiredRoles } = event.detail;
+      const roleNames = requiredRoles
+        .map((r: string) => (r === 'admin' ? 'Administrador' : 'Usuario'))
+        .join(', ');
+
+      this.addNotification({
+        type: 'error',
+        title: 'Acceso Denegado',
+        message: `No tienes permisos para acceder a esta sección. Se requiere rol: ${roleNames}`,
+        duration: 5000,
+      });
+    }) as EventListener);
   }
 
   private setupResizeObserver(): void {
@@ -424,7 +444,10 @@ export class SchoolApp extends LitElement {
           this.navigateToLogin();
         }
       } else {
-        this.navigateToLogin();
+        // Only redirect to login if not already on login page
+        if (window.location.pathname !== '/login') {
+          this.navigateToLogin();
+        }
       }
     } catch (error) {
       console.error('Auth validation error:', error);
@@ -438,6 +461,11 @@ export class SchoolApp extends LitElement {
     }
   }
 
+  private handleLoginSuccess(): void {
+    // Navigate to home after successful login
+    this.router.navigate('/');
+  }
+
   private handleAuthStateChange = (authState: AuthState): void => {
     this.authState = {
       user: authState.user,
@@ -446,9 +474,16 @@ export class SchoolApp extends LitElement {
       error: authState.error,
     };
 
-    // Redirect to login if not authenticated
+    // Redirect to login if not authenticated and not already on login page
     if (!authState.isAuthenticated && !authState.isLoading) {
-      this.navigateToLogin();
+      if (window.location.pathname !== '/login') {
+        this.navigateToLogin();
+      }
+    }
+
+    // Redirect to home if authenticated and on login page
+    if (authState.isAuthenticated && window.location.pathname === '/login') {
+      this.router.navigate('/');
     }
   };
 
@@ -539,7 +574,9 @@ export class SchoolApp extends LitElement {
   private renderCurrentView() {
     switch (this.currentRouteComponent) {
       case 'login-view':
-        return html`<login-view></login-view>`;
+        return html`<login-view
+          @login-success=${this.handleLoginSuccess}
+        ></login-view>`;
       case 'news-view':
         return html`<news-view></news-view>`;
       case 'notices-view':
