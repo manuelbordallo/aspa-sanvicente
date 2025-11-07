@@ -103,7 +103,7 @@
   - Persistir configuraciones en localStorage
   - _Requisitos: 6.1, 6.2, 6.3, 6.4, 6.5_
 
-- [ ] 10. Desarrollar vista de perfil de usuario
+- [x] 10. Desarrollar vista de perfil de usuario
   - Crear ProfileView con información del usuario
   - Implementar formulario de edición de datos personales
   - Agregar funcionalidad de cambio de contraseña
