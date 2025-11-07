@@ -263,6 +263,7 @@ export class SchoolApp extends LitElement {
   `;
 
   // Context providers
+
   @provide({ context: authContext })
   @state()
   private authState!: AuthContextValue;

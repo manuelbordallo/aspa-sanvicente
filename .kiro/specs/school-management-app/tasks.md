@@ -145,18 +145,18 @@
   - Mostrar estados de carga en operaciones asíncronas
   - _Requisitos: 1.3, 4.4, 6.5_
 
-- [ ] 15. Implementar testing y validación
-  - [ ] 15.1 Crear tests unitarios para servicios
+- [x] 15. Implementar testing y validación
+  - [x] 15.1 Crear tests unitarios para servicios
     - Escribir tests para AuthService
     - Crear tests para ApiClient y manejo de errores
     - Testear servicios de entidades (News, Notice, etc.)
     - _Requisitos: 1.1, 3.1, 4.2_
-  - [ ] 15.2 Implementar tests de componentes
+  - [x] 15.2 Implementar tests de componentes
     - Crear tests para componentes de UI básicos
     - Testear formularios y validaciones
     - Verificar comportamiento de vistas principales
     - _Requisitos: 2.5, 7.4, 9.5_
-  - [ ] 15.3 Agregar tests end-to-end
+  - [x] 15.3 Agregar tests end-to-end
     - Crear tests E2E para flujo de autenticación
     - Testear navegación entre vistas
     - Verificar funcionalidades principales de cada vista
