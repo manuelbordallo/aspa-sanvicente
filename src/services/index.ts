@@ -9,6 +9,10 @@ export type { AuthState } from './auth-service.js';
 // Theme Service
 export { ThemeService, themeService } from './theme-service.js';
 
+// Settings Service
+export { SettingsService, settingsService } from './settings-service.js';
+export type { LanguageOption } from './settings-service.js';
+
 // Entity Services
 export { NewsService, newsService } from './news-service.js';
 export type { NewsFilters, NewsPaginationOptions } from './news-service.js';

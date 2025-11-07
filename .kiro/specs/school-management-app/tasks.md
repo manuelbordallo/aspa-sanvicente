@@ -95,7 +95,7 @@
     - Agregar formulario de creación de eventos (solo admin)
     - _Requisitos: 5.2, 5.3, 5.5_
 
-- [ ] 9. Desarrollar vista de configuración
+- [x] 9. Desarrollar vista de configuración
   - Crear SettingsView con opciones de personalización
   - Implementar selector de tema visual
   - Agregar selector de idioma
