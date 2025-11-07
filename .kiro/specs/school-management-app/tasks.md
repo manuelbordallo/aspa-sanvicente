@@ -111,7 +111,7 @@
   - Agregar validación de email y contraseña
   - _Requisitos: 7.1, 7.2, 7.3, 7.4, 7.5_
 
-- [ ] 11. Desarrollar vista de gestión de usuarios (solo admin)
+- [x] 11. Desarrollar vista de gestión de usuarios (solo admin)
   - Crear UsersView con listado de todos los usuarios
   - Implementar restricción de acceso solo para administradores
   - Agregar funcionalidad de edición de datos de usuario
