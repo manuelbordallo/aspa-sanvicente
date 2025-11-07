@@ -2,10 +2,12 @@ import { LitElement, html, css } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { consume } from '@lit/context';
 import { newsService } from '../services/news-service.js';
+import { notificationService } from '../services/notification-service.js';
 import { authContext, type AuthContextValue } from '../contexts/app-context.js';
 import type { News, PaginatedResponse, NewsFormData } from '../types/index.js';
 import '../components/ui/ui-card.js';
 import '../components/ui/ui-button.js';
+import '../components/ui/ui-loading.js';
 import '../components/forms/news-form.js';
 
 @customElement('news-view')
@@ -403,11 +405,17 @@ export class NewsView extends LitElement {
       // Hide the form
       this.showCreateForm = false;
 
-      // Show success message (you might want to implement a notification system)
-      console.log('Noticia creada exitosamente');
+      // Show success notification
+      notificationService.success(
+        'Noticia creada',
+        'La noticia se ha publicado correctamente.'
+      );
     } catch (error) {
       this.error =
         error instanceof Error ? error.message : 'Error al crear la noticia';
+
+      // Show error notification
+      notificationService.error('Error al crear noticia', this.error);
     } finally {
       this.creating = false;
     }

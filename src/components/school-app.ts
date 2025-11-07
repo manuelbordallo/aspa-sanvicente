@@ -19,6 +19,7 @@ import type {
 // Import services
 import { authService } from '../services/auth-service.js';
 import { themeService } from '../services/theme-service.js';
+import { notificationService } from '../services/notification-service.js';
 import type { AuthState } from '../services/auth-service.js';
 
 // Import router
@@ -31,6 +32,7 @@ import type { Theme } from '../types/index.js';
 // Import components
 import '../components/layout/index.js';
 import '../components/ui/ui-loading.js';
+import '../components/ui/ui-toast.js';
 // Views are lazy loaded via router
 
 @customElement('school-app')
@@ -336,6 +338,9 @@ export class SchoolApp extends LitElement {
     // Setup route guards listener
     this.setupRouteGuardsListener();
 
+    // Setup notification service listener
+    this.setupNotificationListener();
+
     // Initialize router
     this.initializeRouter();
 
@@ -358,6 +363,7 @@ export class SchoolApp extends LitElement {
 
     authService.removeAuthStateListener(this.handleAuthStateChange);
     themeService.removeThemeListener(this.handleThemeChange);
+    notificationService.removeListener(this.handleNotification);
   }
 
   private initializeTheme(): void {
@@ -389,6 +395,17 @@ export class SchoolApp extends LitElement {
       });
     }) as EventListener);
   }
+
+  private setupNotificationListener(): void {
+    // Connect notification service to context
+    notificationService.addListener(this.handleNotification);
+  }
+
+  private handleNotification = (
+    notification: Omit<Notification, 'id' | 'createdAt'>
+  ): void => {
+    this.addNotification(notification);
+  };
 
   private setupResizeObserver(): void {
     this.resizeObserver = new ResizeObserver(() => {
@@ -708,6 +725,9 @@ export class SchoolApp extends LitElement {
           <main class="app-content">${this.renderCurrentView()}</main>
         </div>
       </div>
+
+      <!-- Toast notifications -->
+      <ui-toast></ui-toast>
     `;
   }
 }

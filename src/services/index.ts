@@ -31,3 +31,10 @@ export type {
 
 export { UserService, userService } from './user-service.js';
 export type { UserFilters, UserPaginationOptions } from './user-service.js';
+
+// Notification Service
+export { notificationService } from './notification-service.js';
+export type {
+  NotificationOptions,
+  NotificationType,
+} from './notification-service.js';

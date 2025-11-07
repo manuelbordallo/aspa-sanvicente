@@ -2,11 +2,13 @@ import { LitElement, html, css } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { consume } from '@lit/context';
 import { noticeService } from '../services/notice-service.js';
+import { notificationService } from '../services/notification-service.js';
 import { authContext, type AuthContextValue } from '../contexts/app-context.js';
 import type { Notice, User, NoticeFormData } from '../types/index.js';
 import '../components/ui/ui-card.js';
 import '../components/ui/ui-button.js';
 import '../components/ui/ui-modal.js';
+import '../components/ui/ui-loading.js';
 import '../components/forms/notice-form.js';
 
 @customElement('notices-view')
@@ -308,9 +310,18 @@ export class NoticesView extends LitElement {
       if (!this.showAll) {
         this.notices = this.notices.filter((n) => n.id !== notice.id);
       }
+
+      // Show success notification
+      notificationService.success(
+        'Aviso marcado',
+        'El aviso se ha marcado como leído.'
+      );
     } catch (error) {
       this.error =
         error instanceof Error ? error.message : 'Error al marcar como leído';
+
+      // Show error notification
+      notificationService.error('Error', this.error);
       console.error('Error marking notice as read:', error);
     }
   }
@@ -390,11 +401,17 @@ export class NoticesView extends LitElement {
       await this.loadNotices();
       await this.loadUnreadCount();
 
-      // Show success message (you could implement a notification system)
-      console.log('Aviso creado exitosamente');
+      // Show success notification
+      notificationService.success(
+        'Aviso creado',
+        'El aviso se ha enviado correctamente.'
+      );
     } catch (error) {
       this.error =
         error instanceof Error ? error.message : 'Error al crear el aviso';
+
+      // Show error notification
+      notificationService.error('Error al crear aviso', this.error);
       console.error('Error creating notice:', error);
     } finally {
       this.creatingNotice = false;

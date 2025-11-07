@@ -1,6 +1,7 @@
 import { LitElement, html, css } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { settingsService, authService } from '../services/index.js';
+import { notificationService } from '../services/notification-service.js';
 import type { AppSettings, Theme } from '../types/index.js';
 import type { LanguageOption } from '../services/settings-service.js';
 
@@ -9,6 +10,7 @@ import '../components/ui/ui-card.js';
 import '../components/ui/ui-select.js';
 import '../components/ui/ui-input.js';
 import '../components/ui/ui-button.js';
+import '../components/ui/ui-confirm.js';
 
 @customElement('settings-view')
 export class SettingsView extends LitElement {
@@ -301,28 +303,48 @@ export class SettingsView extends LitElement {
   }
 
   private async resetSettings() {
-    try {
-      this.saving = true;
-      settingsService.resetSettings();
-      this.showNotification(
-        'Configuración restablecida a valores por defecto',
-        'success'
-      );
-    } catch (error) {
-      console.error('Error resetting settings:', error);
-      this.showNotification('Error al restablecer la configuración', 'error');
-    } finally {
-      this.saving = false;
-    }
+    // Create confirmation dialog
+    const confirm = document.createElement('ui-confirm');
+    document.body.appendChild(confirm);
+
+    confirm.open({
+      title: 'Restablecer configuración',
+      message:
+        '¿Estás seguro de que deseas restablecer toda la configuración a los valores por defecto?',
+      confirmText: 'Restablecer',
+      cancelText: 'Cancelar',
+      type: 'warning',
+      onConfirm: async () => {
+        try {
+          this.saving = true;
+          settingsService.resetSettings();
+          this.showNotification(
+            'Configuración restablecida a valores por defecto',
+            'success'
+          );
+        } catch (error) {
+          console.error('Error resetting settings:', error);
+          this.showNotification(
+            'Error al restablecer la configuración',
+            'error'
+          );
+        } finally {
+          this.saving = false;
+          document.body.removeChild(confirm);
+        }
+      },
+      onCancel: () => {
+        document.body.removeChild(confirm);
+      },
+    });
   }
 
   private showNotification(message: string, type: 'success' | 'error') {
-    this.notification = { message, type };
-
-    // Auto-hide notification after 3 seconds
-    setTimeout(() => {
-      this.notification = null;
-    }, 3000);
+    if (type === 'success') {
+      notificationService.success('Configuración', message);
+    } else {
+      notificationService.error('Error', message);
+    }
   }
 
   private getThemeOptions() {

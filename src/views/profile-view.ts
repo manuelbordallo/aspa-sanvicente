@@ -4,11 +4,13 @@ import { consume } from '@lit/context';
 import { authContext } from '../contexts/index.js';
 import type { AuthContextValue } from '../contexts/index.js';
 import { authService } from '../services/auth-service.js';
+import { notificationService } from '../services/notification-service.js';
 import { ValidationService } from '../utils/validators.js';
 import type { User, PasswordChangeData, FormError } from '../types/index.js';
 import '../components/ui/ui-input.js';
 import '../components/ui/ui-button.js';
 import '../components/ui/ui-card.js';
+import '../components/ui/ui-confirm.js';
 
 @customElement('profile-view')
 export class ProfileView extends LitElement {
@@ -445,11 +447,23 @@ export class ProfileView extends LitElement {
       this.profileSuccess = 'Perfil actualizado correctamente';
       this.isEditingProfile = false;
       this.profileTouched = {};
+
+      // Show success notification
+      notificationService.success(
+        'Perfil actualizado',
+        'Tus datos se han actualizado correctamente.'
+      );
     } catch (error) {
       this.profileError =
         error instanceof Error
           ? error.message
           : 'Error al actualizar el perfil';
+
+      // Show error notification
+      notificationService.error(
+        'Error al actualizar perfil',
+        this.profileError
+      );
     } finally {
       this.profileLoading = false;
     }
@@ -571,23 +585,57 @@ export class ProfileView extends LitElement {
         newPassword: '',
         confirmPassword: '',
       };
+
+      // Show success notification
+      notificationService.success(
+        'Contraseña actualizada',
+        'Tu contraseña se ha cambiado correctamente.'
+      );
     } catch (error) {
       this.passwordError =
         error instanceof Error
           ? error.message
           : 'Error al cambiar la contraseña';
+
+      // Show error notification
+      notificationService.error(
+        'Error al cambiar contraseña',
+        this.passwordError
+      );
     } finally {
       this.passwordLoading = false;
     }
   }
 
   private async handleLogout() {
-    try {
-      await authService.logout();
-      window.location.href = '/login';
-    } catch (error) {
-      console.error('Error during logout:', error);
-    }
+    // Create confirmation dialog
+    const confirm = document.createElement('ui-confirm');
+    document.body.appendChild(confirm);
+
+    confirm.open({
+      title: 'Cerrar sesión',
+      message: '¿Estás seguro de que deseas cerrar sesión?',
+      confirmText: 'Cerrar sesión',
+      cancelText: 'Cancelar',
+      type: 'info',
+      onConfirm: async () => {
+        try {
+          await authService.logout();
+          window.location.href = '/login';
+        } catch (error) {
+          console.error('Error during logout:', error);
+          notificationService.error(
+            'Error',
+            'No se pudo cerrar la sesión. Intenta nuevamente.'
+          );
+        } finally {
+          document.body.removeChild(confirm);
+        }
+      },
+      onCancel: () => {
+        document.body.removeChild(confirm);
+      },
+    });
   }
 
   private getProfileFieldError(field: string): string {

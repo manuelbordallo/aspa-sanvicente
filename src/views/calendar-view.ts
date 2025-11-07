@@ -2,11 +2,13 @@ import { LitElement, html, css } from 'lit';
 import { customElement, state, property } from 'lit/decorators.js';
 import { consume } from '@lit/context';
 import { calendarService } from '../services/calendar-service.js';
+import { notificationService } from '../services/notification-service.js';
 import type { CalendarEvent } from '../types/index.js';
 import { authContext, type AuthContextValue } from '../contexts/app-context.js';
 import '../components/ui/ui-button.js';
 import '../components/ui/ui-card.js';
 import '../components/ui/ui-modal.js';
+import '../components/ui/ui-loading.js';
 import '../components/forms/event-form.js';
 
 @customElement('calendar-view')
@@ -835,10 +837,20 @@ export class CalendarView extends LitElement {
       await calendarService.createEvent(event.detail.formData);
       this._closeCreateModal();
       await this._loadEvents();
-      // TODO: Show success notification
+
+      // Show success notification
+      notificationService.success(
+        'Evento creado',
+        'El evento se ha agregado al calendario correctamente.'
+      );
     } catch (error) {
       console.error('Error creating event:', error);
-      // TODO: Show error notification
+
+      // Show error notification
+      notificationService.error(
+        'Error al crear evento',
+        error instanceof Error ? error.message : 'No se pudo crear el evento.'
+      );
     } finally {
       this._creatingEvent = false;
     }

@@ -1,6 +1,7 @@
 import { LitElement, html, css } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { userService, authService } from '../services/index.js';
+import { notificationService } from '../services/notification-service.js';
 import type { User, UserRole, UserFormData } from '../types/index.js';
 
 // Import UI components
@@ -9,6 +10,8 @@ import '../components/ui/ui-button.js';
 import '../components/ui/ui-modal.js';
 import '../components/ui/ui-input.js';
 import '../components/ui/ui-select.js';
+import '../components/ui/ui-confirm.js';
+import '../components/ui/ui-loading.js';
 import type { SelectOption } from '../components/ui/ui-select.js';
 
 @customElement('users-view')
@@ -432,30 +435,51 @@ export class UsersView extends LitElement {
   private async changeUserRole(user: User, newRole: UserRole) {
     if (user.role === newRole) return;
 
-    try {
-      await userService.changeUserRole(user.id, newRole);
-      this.showNotification(
-        'Rol de usuario actualizado correctamente',
-        'success'
-      );
-      await this.loadUsers();
-    } catch (error) {
-      console.error('Error changing user role:', error);
-      this.showNotification(
-        error instanceof Error
-          ? error.message
-          : 'Error al cambiar el rol del usuario',
-        'error'
-      );
-    }
+    const roleLabel = newRole === 'admin' ? 'Administrador' : 'Usuario';
+    const userName = `${user.firstName} ${user.lastName}`;
+
+    // Create confirmation dialog
+    const confirm = document.createElement('ui-confirm');
+    document.body.appendChild(confirm);
+
+    confirm.open({
+      title: 'Cambiar rol de usuario',
+      message: `¿Estás seguro de que deseas cambiar el rol de ${userName} a ${roleLabel}?`,
+      confirmText: 'Cambiar rol',
+      cancelText: 'Cancelar',
+      type: 'warning',
+      onConfirm: async () => {
+        try {
+          await userService.changeUserRole(user.id, newRole);
+          this.showNotification(
+            'Rol de usuario actualizado correctamente',
+            'success'
+          );
+          await this.loadUsers();
+        } catch (error) {
+          console.error('Error changing user role:', error);
+          this.showNotification(
+            error instanceof Error
+              ? error.message
+              : 'Error al cambiar el rol del usuario',
+            'error'
+          );
+        } finally {
+          document.body.removeChild(confirm);
+        }
+      },
+      onCancel: () => {
+        document.body.removeChild(confirm);
+      },
+    });
   }
 
   private showNotification(message: string, type: 'success' | 'error') {
-    this.notification = { message, type };
-
-    setTimeout(() => {
-      this.notification = null;
-    }, 3000);
+    if (type === 'success') {
+      notificationService.success('Éxito', message);
+    } else {
+      notificationService.error('Error', message);
+    }
   }
 
   private getRoleOptions(): SelectOption[] {
