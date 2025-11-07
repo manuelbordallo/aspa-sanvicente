@@ -272,6 +272,47 @@ export class ProfileView extends LitElement {
         color: #9ca3af;
       }
     }
+
+    @media (max-width: 768px) {
+      :host {
+        padding: 1rem;
+      }
+
+      .view-title {
+        font-size: 1.5rem;
+      }
+
+      .profile-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .card {
+        padding: 1rem;
+      }
+
+      .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+      }
+
+      .form-actions {
+        flex-direction: column;
+      }
+
+      .form-actions ui-button {
+        width: 100%;
+      }
+
+      .logout-content {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .logout-content ui-button {
+        width: 100%;
+      }
+    }
   `;
 
   connectedCallback() {

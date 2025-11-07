@@ -9,7 +9,19 @@ export interface RouteConfig {
   requiresAuth?: boolean;
   allowedRoles?: UserRole[];
   title?: string;
+  lazyLoad?: () => Promise<any>;
 }
+
+// Lazy load view components
+const lazyLoadViews = {
+  'news-view': () => import('../views/news-view.js'),
+  'notices-view': () => import('../views/notices-view.js'),
+  'calendar-view': () => import('../views/calendar-view.js'),
+  'users-view': () => import('../views/users-view.js'),
+  'settings-view': () => import('../views/settings-view.js'),
+  'profile-view': () => import('../views/profile-view.js'),
+  'login-view': () => import('../views/login-view.js'),
+};
 
 export const routes: RouteConfig[] = [
   {
@@ -19,6 +31,7 @@ export const routes: RouteConfig[] = [
     requiresAuth: true,
     allowedRoles: ['user', 'admin'],
     title: 'Noticias',
+    lazyLoad: lazyLoadViews['news-view'],
   },
   {
     path: '/news',
@@ -27,6 +40,7 @@ export const routes: RouteConfig[] = [
     requiresAuth: true,
     allowedRoles: ['user', 'admin'],
     title: 'Noticias',
+    lazyLoad: lazyLoadViews['news-view'],
   },
   {
     path: '/notices',
@@ -35,6 +49,7 @@ export const routes: RouteConfig[] = [
     requiresAuth: true,
     allowedRoles: ['user', 'admin'],
     title: 'Avisos',
+    lazyLoad: lazyLoadViews['notices-view'],
   },
   {
     path: '/calendar',
@@ -43,6 +58,7 @@ export const routes: RouteConfig[] = [
     requiresAuth: true,
     allowedRoles: ['user', 'admin'],
     title: 'Calendario',
+    lazyLoad: lazyLoadViews['calendar-view'],
   },
   {
     path: '/users',
@@ -51,6 +67,7 @@ export const routes: RouteConfig[] = [
     requiresAuth: true,
     allowedRoles: ['admin'],
     title: 'Usuarios',
+    lazyLoad: lazyLoadViews['users-view'],
   },
   {
     path: '/settings',
@@ -59,6 +76,7 @@ export const routes: RouteConfig[] = [
     requiresAuth: true,
     allowedRoles: ['user', 'admin'],
     title: 'Configuración',
+    lazyLoad: lazyLoadViews['settings-view'],
   },
   {
     path: '/profile',
@@ -67,6 +85,7 @@ export const routes: RouteConfig[] = [
     requiresAuth: true,
     allowedRoles: ['user', 'admin'],
     title: 'Perfil',
+    lazyLoad: lazyLoadViews['profile-view'],
   },
   {
     path: '/login',
@@ -74,6 +93,7 @@ export const routes: RouteConfig[] = [
     component: 'login-view',
     requiresAuth: false,
     title: 'Iniciar Sesión',
+    lazyLoad: lazyLoadViews['login-view'],
   },
 ];
 
@@ -153,6 +173,8 @@ export class RouteGuard {
 export class SimpleRouter {
   private currentRoute: RouteConfig | null = null;
   private listeners: ((route: RouteConfig | null) => void)[] = [];
+  private loadedComponents: Set<string> = new Set();
+  private loadingRoute = false;
 
   constructor() {
     this.setupEventListeners();
@@ -165,7 +187,9 @@ export class SimpleRouter {
     });
   }
 
-  private handleRouteChange(): void {
+  private async handleRouteChange(): Promise<void> {
+    if (this.loadingRoute) return;
+
     const path = window.location.pathname;
     const route = this.findRoute(path);
 
@@ -185,6 +209,19 @@ export class SimpleRouter {
       // Update document title
       if (route.title) {
         document.title = `${route.title} - Gestión Escolar`;
+      }
+
+      // Lazy load component if needed
+      if (route.lazyLoad && !this.loadedComponents.has(route.component)) {
+        this.loadingRoute = true;
+        try {
+          await route.lazyLoad();
+          this.loadedComponents.add(route.component);
+        } catch (error) {
+          console.error(`Error loading component ${route.component}:`, error);
+        } finally {
+          this.loadingRoute = false;
+        }
       }
 
       this.currentRoute = route;
@@ -218,8 +255,14 @@ export class SimpleRouter {
   navigate(path: string): void {
     if (window.location.pathname !== path) {
       window.history.pushState({}, '', path);
-      this.handleRouteChange();
+      this.handleRouteChange().catch((error) => {
+        console.error('Navigation error:', error);
+      });
     }
+  }
+
+  isLoading(): boolean {
+    return this.loadingRoute;
   }
 
   getCurrentRoute(): RouteConfig | null {

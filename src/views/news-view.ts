@@ -278,9 +278,26 @@ export class NewsView extends LitElement {
         align-items: stretch;
       }
 
+      .view-title {
+        font-size: 1.5rem;
+      }
+
+      .header-actions {
+        width: 100%;
+      }
+
+      .header-actions ui-button {
+        width: 100%;
+      }
+
+      .modal-overlay {
+        padding: 0;
+      }
+
       .modal-content {
-        margin: 0.5rem;
-        max-height: calc(100vh - 1rem);
+        margin: 0;
+        max-height: 100vh;
+        border-radius: 0;
       }
 
       .modal-header,
@@ -288,6 +305,29 @@ export class NewsView extends LitElement {
       .modal-footer {
         padding-left: 1rem;
         padding-right: 1rem;
+      }
+
+      .modal-title {
+        font-size: 1.25rem;
+      }
+
+      .create-form-modal {
+        padding: 0;
+      }
+
+      .create-form-content {
+        margin: 0;
+        max-height: 100vh;
+        border-radius: 0;
+      }
+
+      .news-item {
+        margin: 0 -0.5rem;
+      }
+
+      .pagination {
+        flex-direction: column;
+        gap: 0.75rem;
       }
     }
   `;

@@ -403,23 +403,72 @@ export class CalendarView extends LitElement {
         gap: 1rem;
       }
 
+      .view-title {
+        font-size: 1.5rem;
+      }
+
       .calendar-header {
         flex-direction: column;
         gap: 1rem;
+        padding: 0.75rem;
+      }
+
+      .month-navigation {
+        width: 100%;
+        justify-content: space-between;
+      }
+
+      .current-month {
+        font-size: 1rem;
+        min-width: auto;
       }
 
       .calendar-day {
-        min-height: 6rem;
+        min-height: 5rem;
         padding: 0.25rem;
       }
 
       .day-number {
         font-size: 0.75rem;
+        margin-bottom: 0.25rem;
       }
 
       .event-item {
         font-size: 0.625rem;
         padding: 0.125rem 0.25rem;
+      }
+
+      .weekday {
+        padding: 0.5rem;
+        font-size: 0.75rem;
+      }
+
+      .day-events-list {
+        gap: 0.75rem;
+      }
+
+      .day-event-item {
+        padding: 0.75rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .calendar-day {
+        min-height: 4rem;
+      }
+
+      .event-item {
+        display: none;
+      }
+
+      .calendar-day--has-events::after {
+        content: '•';
+        position: absolute;
+        bottom: 0.25rem;
+        right: 0.25rem;
+        color: #3b82f6;
+        font-size: 1.5rem;
+        line-height: 1;
       }
     }
   `;

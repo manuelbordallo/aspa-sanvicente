@@ -210,10 +210,20 @@ export class NoticesView extends LitElement {
       .header-actions {
         flex-direction: column;
         align-items: stretch;
+        width: 100%;
+      }
+
+      .header-actions ui-button {
+        width: 100%;
       }
 
       .filter-toggle {
         justify-content: center;
+        flex-direction: column;
+      }
+
+      .filter-toggle ui-button {
+        width: 100%;
       }
 
       .notice-header {
@@ -228,6 +238,16 @@ export class NoticesView extends LitElement {
 
       .notice-actions {
         justify-content: flex-start;
+        flex-direction: column;
+        width: 100%;
+      }
+
+      .notice-actions ui-button {
+        width: 100%;
+      }
+
+      .notice-content {
+        padding: 0.75rem;
       }
     }
   `;

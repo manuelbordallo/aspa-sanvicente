@@ -318,6 +318,36 @@ export class UsersView extends LitElement {
       }
     }
 
+    @media (max-width: 768px) {
+      :host {
+        padding: 1rem;
+      }
+
+      .view-title {
+        font-size: 1.5rem;
+      }
+
+      .user-card {
+        padding: 1rem;
+      }
+
+      .user-card-actions {
+        flex-direction: column;
+      }
+
+      .user-card-actions ui-button {
+        width: 100%;
+      }
+
+      .modal-actions {
+        flex-direction: column;
+      }
+
+      .modal-actions ui-button {
+        width: 100%;
+      }
+    }
+
     @media (max-width: 640px) {
       .form-row {
         grid-template-columns: 1fr;

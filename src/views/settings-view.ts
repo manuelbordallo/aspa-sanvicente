@@ -207,6 +207,32 @@ export class SettingsView extends LitElement {
       background-color: #451a03;
       color: #fbbf24;
     }
+
+    @media (max-width: 768px) {
+      :host {
+        padding: 1rem;
+      }
+
+      .view-title {
+        font-size: 1.5rem;
+      }
+
+      .course-edit-actions {
+        flex-direction: column;
+      }
+
+      .course-edit-actions ui-button {
+        width: 100%;
+      }
+
+      .actions {
+        flex-direction: column;
+      }
+
+      .actions ui-button {
+        width: 100%;
+      }
+    }
   `;
 
   connectedCallback() {

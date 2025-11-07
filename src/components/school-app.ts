@@ -30,7 +30,8 @@ import type { Theme } from '../types/index.js';
 
 // Import components
 import '../components/layout/index.js';
-import '../views/index.js';
+import '../components/ui/ui-loading.js';
+// Views are lazy loaded via router
 
 @customElement('school-app')
 export class SchoolApp extends LitElement {
@@ -281,6 +282,7 @@ export class SchoolApp extends LitElement {
   @state() private isMobile = false;
   @state() private currentPageTitle = 'Noticias';
   @state() private currentRouteComponent = 'news-view';
+  @state() private routeLoading = false;
 
   @query('app-navigation') private navigation!: any;
 
@@ -414,6 +416,7 @@ export class SchoolApp extends LitElement {
         this.appState = { ...this.appState, currentView: route.name };
         this.currentPageTitle = route.title || route.name;
         this.currentRouteComponent = route.component;
+        this.routeLoading = this.router.isLoading();
         this.requestUpdate();
       }
     });
@@ -572,6 +575,14 @@ export class SchoolApp extends LitElement {
   }
 
   private renderCurrentView() {
+    // Show loading state while route is loading
+    if (this.routeLoading) {
+      return html`<ui-loading
+        size="lg"
+        message="Cargando vista..."
+      ></ui-loading>`;
+    }
+
     switch (this.currentRouteComponent) {
       case 'login-view':
         return html`<login-view
