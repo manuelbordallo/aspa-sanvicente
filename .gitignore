@@ -49,4 +49,4 @@ temp/
 
 # Cache
 .cache/
-.parcel-cache/
+.parcel-cache/.github/workflows/
