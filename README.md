@@ -76,6 +76,17 @@ src/
 
 3. Abrir [http://localhost:3000](http://localhost:3000) en el navegador
 
+### Desarrollo sin Backend
+
+La aplicación incluye un **modo mock** que permite desarrollar sin necesidad de un backend activo. El modo se activa automáticamente si el backend no está disponible.
+
+**Credenciales de prueba:**
+
+- Admin: `admin@example.com` / `admin123`
+- Usuario: `user@example.com` / `user123`
+
+Ver [DEVELOPMENT.md](./DEVELOPMENT.md) para más detalles sobre desarrollo sin backend y troubleshooting.
+
 ## Build y Despliegue
 
 ### Variables de Entorno
@@ -136,6 +147,7 @@ docker-compose up -d
 
 Ver documentación detallada:
 
+- [DEVELOPMENT.md](./DEVELOPMENT.md) - Guía de desarrollo sin backend y troubleshooting
 - [BUILD.md](./BUILD.md) - Guía completa de build y optimización
 - [DEPLOYMENT.md](./DEPLOYMENT.md) - Instrucciones detalladas de despliegue
 - [QUICK_DEPLOY.md](./QUICK_DEPLOY.md) - Guía rápida de despliegue
