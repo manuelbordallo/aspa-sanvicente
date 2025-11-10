@@ -6,6 +6,12 @@ export type { RequestConfig, Interceptor } from './api-client.js';
 export { AuthService, authService } from './auth-service.js';
 export type { AuthState } from './auth-service.js';
 
+// Mock Authentication Service
+export { MockAuthService, mockAuthService } from './mock-auth-service.js';
+
+// Auth Service Factory
+export { authServiceFactory } from './auth-service-factory.js';
+
 // Theme Service
 export { ThemeService, themeService } from './theme-service.js';
 

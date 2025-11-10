@@ -7,8 +7,8 @@
   - Implement retry logic with exponential backoff
   - _Requirements: 1.1, 1.4_
 
-- [-] 2. Create Mock Auth Service
-  - [-] 2.1 Implement mock authentication service
+- [x] 2. Create Mock Auth Service
+  - [x] 2.1 Implement mock authentication service
     - Create `src/services/mock-auth-service.ts` with same interface as AuthService
     - Define mock user data with admin and regular user credentials
     - Implement login method that validates against mock users
@@ -16,13 +16,13 @@
     - Store mock session in localStorage with same structure as real auth
     - _Requirements: 1.5, 3.4_
 
-  - [ ] 2.2 Create mock data stores for other services
+  - [x] 2.2 Create mock data stores for other services
     - Create mock implementations for news, notices, calendar services
     - Use localStorage to persist mock data between sessions
     - _Requirements: 1.2_
 
-- [ ] 3. Implement Auth Service Factory
-  - [ ] 3.1 Create service factory with mode detection
+- [x] 3. Implement Auth Service Factory
+  - [x] 3.1 Create service factory with mode detection
     - Create `src/services/auth-service-factory.ts`
     - Implement logic to check VITE_ENABLE_MOCK_MODE environment variable
     - Integrate with backend detector to determine service mode
@@ -30,12 +30,12 @@
     - Add logging to indicate which mode is active
     - _Requirements: 1.2, 3.1, 3.3_
 
-  - [ ] 3.2 Update auth service exports
+  - [x] 3.2 Update auth service exports
     - Modify `src/services/index.ts` to export from factory instead of direct instance
     - Ensure backward compatibility with existing code
     - _Requirements: 3.1_
 
-- [ ] 4. Enhance API Client Error Handling
+- [-] 4. Enhance API Client Error Handling
   - Update `src/services/api-client.ts` with shorter timeout for initial detection
   - Improve error handling for network failures
   - Add better error logging with error types
