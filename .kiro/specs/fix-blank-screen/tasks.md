@@ -66,7 +66,7 @@
   - Subscribe to backend detector status changes
   - _Requirements: 2.1, 2.2, 2.4_
 
-- [-] 7. Add Environment Configuration
+- [x] 7. Add Environment Configuration
   - Update `.env.development` with mock mode and timeout settings
   - Add VITE_ENABLE_MOCK_MODE variable
   - Add VITE_BACKEND_DETECTION_TIMEOUT variable
@@ -74,7 +74,7 @@
   - Update `src/config/env.ts` to read new variables
   - _Requirements: 3.1, 3.2_
 
-- [ ] 8. Update Login View
+- [-] 8. Update Login View
   - Modify `src/views/login-view.ts` to show mock mode indicator when active
   - Add helper text showing mock credentials when in mock mode
   - Improve error messages for connection issues

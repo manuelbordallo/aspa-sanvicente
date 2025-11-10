@@ -18,6 +18,8 @@ export interface AppConfig {
   features: {
     notifications: boolean;
     analytics: boolean;
+    mockMode: boolean;
+    showConnectionStatus: boolean;
   };
   auth: {
     tokenKey: string;
@@ -61,6 +63,8 @@ export const config: AppConfig = {
   features: {
     notifications: getEnvBoolean('VITE_ENABLE_NOTIFICATIONS', true),
     analytics: getEnvBoolean('VITE_ENABLE_ANALYTICS', false),
+    mockMode: getEnvBoolean('VITE_ENABLE_MOCK_MODE', false),
+    showConnectionStatus: getEnvBoolean('VITE_SHOW_CONNECTION_STATUS', true),
   },
   auth: {
     tokenKey: getEnvVar('VITE_AUTH_TOKEN_KEY', 'auth_token'),
