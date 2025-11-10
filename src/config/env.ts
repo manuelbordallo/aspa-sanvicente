@@ -7,6 +7,7 @@ export interface AppConfig {
   api: {
     baseUrl: string;
     timeout: number;
+    detectionTimeout: number;
   };
   app: {
     name: string;
@@ -46,6 +47,7 @@ export const config: AppConfig = {
   api: {
     baseUrl: getEnvVar('VITE_API_BASE_URL', '/api'),
     timeout: getEnvNumber('VITE_API_TIMEOUT', 30000),
+    detectionTimeout: getEnvNumber('VITE_BACKEND_DETECTION_TIMEOUT', 2000),
   },
   app: {
     name: getEnvVar('VITE_APP_NAME', 'Gestión Escolar'),

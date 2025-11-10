@@ -12,15 +12,38 @@ export interface Interceptor {
   error?: (error: Error) => Error | Promise<Error>;
 }
 
+export enum ErrorType {
+  NETWORK_ERROR = 'NETWORK_ERROR',
+  TIMEOUT_ERROR = 'TIMEOUT_ERROR',
+  CONNECTION_ERROR = 'CONNECTION_ERROR',
+  HTTP_ERROR = 'HTTP_ERROR',
+  PARSE_ERROR = 'PARSE_ERROR',
+  UNKNOWN_ERROR = 'UNKNOWN_ERROR',
+}
+
+export interface EnhancedApiError extends ApiError {
+  type: ErrorType;
+  isConnectionError?: boolean;
+}
+
 export class ApiClient {
   private baseURL: string;
   private defaultTimeout: number;
+  private detectionTimeout: number;
   private interceptors: Interceptor[] = [];
 
   constructor(baseURL?: string, timeout?: number) {
     this.baseURL = baseURL || config.api.baseUrl;
     this.defaultTimeout = timeout || config.api.timeout;
+    this.detectionTimeout = config.api.detectionTimeout || 2000;
     this.setupDefaultInterceptors();
+  }
+
+  /**
+   * Get timeout for backend detection (shorter than default)
+   */
+  getDetectionTimeout(): number {
+    return this.detectionTimeout;
   }
 
   /**
@@ -121,7 +144,7 @@ export class ApiClient {
   /**
    * Create an API error from response
    */
-  private async createApiError(response: Response): Promise<ApiError> {
+  private async createApiError(response: Response): Promise<EnhancedApiError> {
     let errorData: any = {};
 
     try {
@@ -136,7 +159,65 @@ export class ApiClient {
       code: errorData.code || 'UNKNOWN_ERROR',
       status: response.status,
       details: errorData.details,
+      type: ErrorType.HTTP_ERROR,
+      isConnectionError: false,
     };
+  }
+
+  /**
+   * Detect if error is a connection error
+   */
+  private isConnectionError(error: Error): boolean {
+    const connectionErrorPatterns = [
+      'Failed to fetch',
+      'NetworkError',
+      'Network request failed',
+      'fetch failed',
+      'ECONNREFUSED',
+      'ENOTFOUND',
+      'ETIMEDOUT',
+      'ERR_CONNECTION_REFUSED',
+      'ERR_NAME_NOT_RESOLVED',
+    ];
+
+    return connectionErrorPatterns.some((pattern) =>
+      error.message.includes(pattern)
+    );
+  }
+
+  /**
+   * Create enhanced error with type and logging
+   */
+  private createEnhancedError(
+    message: string,
+    type: ErrorType,
+    originalError?: Error,
+    status?: number
+  ): Error {
+    const error = new Error(message);
+    const apiError: EnhancedApiError = {
+      message,
+      code: type,
+      status: status || 0,
+      type,
+      isConnectionError:
+        type === ErrorType.CONNECTION_ERROR || type === ErrorType.NETWORK_ERROR,
+    };
+
+    (error as any).apiError = apiError;
+
+    // Enhanced logging with error type
+    if (config.debug) {
+      console.error(`[API Client] ${type}:`, {
+        message,
+        type,
+        status,
+        originalError: originalError?.message,
+        stack: originalError?.stack,
+      });
+    }
+
+    return error;
   }
 
   /**
@@ -149,7 +230,7 @@ export class ApiClient {
     const url = `${this.baseURL}${endpoint}`;
 
     // Setup default config
-    let config: RequestConfig = {
+    let requestConfig: RequestConfig = {
       timeout: this.defaultTimeout,
       headers: {
         'Content-Type': 'application/json',
@@ -159,15 +240,18 @@ export class ApiClient {
 
     try {
       // Apply request interceptors
-      config = await this.applyRequestInterceptors(config);
+      requestConfig = await this.applyRequestInterceptors(requestConfig);
 
       // Create AbortController for timeout
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), config.timeout);
+      const timeoutId = setTimeout(
+        () => controller.abort(),
+        requestConfig.timeout
+      );
 
       // Make the request
       const response = await fetch(url, {
-        ...config,
+        ...requestConfig,
         signal: controller.signal,
       });
 
@@ -185,25 +269,64 @@ export class ApiClient {
       }
 
       // Parse successful response
-      const data = await processedResponse.json();
+      let data;
+      try {
+        data = await processedResponse.json();
+      } catch (parseError) {
+        throw this.createEnhancedError(
+          'Error al procesar la respuesta del servidor',
+          ErrorType.PARSE_ERROR,
+          parseError instanceof Error ? parseError : undefined
+        );
+      }
+
       return data;
     } catch (error) {
       // Handle network errors, timeouts, etc.
       if (error instanceof Error) {
+        // Already processed error (from HTTP error handling)
+        if ((error as any).apiError) {
+          throw await this.applyErrorInterceptors(error);
+        }
+
+        // Timeout error
         if (error.name === 'AbortError') {
-          const timeoutError = new Error('Tiempo de espera agotado');
-          (timeoutError as any).apiError = {
-            message: 'Tiempo de espera agotado',
-            code: 'TIMEOUT_ERROR',
-            status: 408,
-          };
+          const timeoutError = this.createEnhancedError(
+            'Tiempo de espera agotado. El servidor no responde.',
+            ErrorType.TIMEOUT_ERROR,
+            error,
+            408
+          );
           throw await this.applyErrorInterceptors(timeoutError);
         }
 
-        throw await this.applyErrorInterceptors(error);
+        // Connection error detection
+        if (this.isConnectionError(error)) {
+          const connectionError = this.createEnhancedError(
+            'No se puede conectar con el servidor. Verifica tu conexión.',
+            ErrorType.CONNECTION_ERROR,
+            error,
+            0
+          );
+          throw await this.applyErrorInterceptors(connectionError);
+        }
+
+        // Network error (generic)
+        const networkError = this.createEnhancedError(
+          'Error de red. Intenta nuevamente.',
+          ErrorType.NETWORK_ERROR,
+          error,
+          0
+        );
+        throw await this.applyErrorInterceptors(networkError);
       }
 
-      throw error;
+      // Unknown error type
+      const unknownError = this.createEnhancedError(
+        'Error desconocido',
+        ErrorType.UNKNOWN_ERROR
+      );
+      throw await this.applyErrorInterceptors(unknownError);
     }
   }
 
