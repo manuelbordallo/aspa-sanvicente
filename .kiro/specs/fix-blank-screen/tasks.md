@@ -74,7 +74,7 @@
   - Update `src/config/env.ts` to read new variables
   - _Requirements: 3.1, 3.2_
 
-- [-] 8. Update Login View
+- [x] 8. Update Login View
   - Modify `src/views/login-view.ts` to show mock mode indicator when active
   - Add helper text showing mock credentials when in mock mode
   - Improve error messages for connection issues

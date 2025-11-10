@@ -1,6 +1,8 @@
 import { LitElement, html, css } from 'lit';
 import { customElement, state, query } from 'lit/decorators.js';
 import { authService } from '../services/auth-service.js';
+import { authServiceFactory } from '../services/auth-service-factory.js';
+import { mockAuthService } from '../services/mock-auth-service.js';
 import type { LoginFormData } from '../types/index.js';
 import '../components/forms/login-form.js';
 
@@ -8,6 +10,7 @@ import '../components/forms/login-form.js';
 export class LoginView extends LitElement {
   @state() private isLoading = false;
   @state() private errorMessage = '';
+  @state() private isMockMode = false;
 
   @query('login-form') private loginForm!: any;
 
@@ -66,6 +69,49 @@ export class LoginView extends LitElement {
       font-weight: 700;
     }
 
+    .mock-mode-banner {
+      background: #fef3c7;
+      border: 1px solid #fbbf24;
+      border-radius: 0.375rem;
+      padding: 0.75rem;
+      margin-bottom: 1rem;
+      font-size: 0.875rem;
+      color: #92400e;
+    }
+
+    .mock-mode-title {
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .mock-mode-icon {
+      font-size: 1rem;
+    }
+
+    .mock-credentials {
+      margin-top: 0.5rem;
+      padding-top: 0.5rem;
+      border-top: 1px solid #fbbf24;
+    }
+
+    .mock-credentials-title {
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+
+    .credential-item {
+      margin: 0.25rem 0;
+      font-family: monospace;
+      font-size: 0.8125rem;
+    }
+
+    .credential-label {
+      font-weight: 600;
+    }
+
     /* Dark mode support */
     @media (prefers-color-scheme: dark) {
       :host {
@@ -84,11 +130,26 @@ export class LoginView extends LitElement {
       .login-subtitle {
         color: #9ca3af;
       }
+
+      .mock-mode-banner {
+        background: #422006;
+        border-color: #92400e;
+        color: #fef3c7;
+      }
+
+      .mock-credentials {
+        border-top-color: #92400e;
+      }
     }
   `;
 
   connectedCallback() {
     super.connectedCallback();
+
+    // Check if in mock mode
+    if (authServiceFactory.isInitialized()) {
+      this.isMockMode = authServiceFactory.isMockMode();
+    }
 
     // Check if already authenticated and redirect
     if (authService.isAuthenticated()) {
@@ -106,11 +167,44 @@ export class LoginView extends LitElement {
             <p class="login-subtitle">Inicia sesión para continuar</p>
           </div>
 
+          ${this.renderMockModeBanner()}
+
           <login-form
             .loading=${this.isLoading}
             .errorMessage=${this.errorMessage}
             @login-submit=${this.handleLoginSubmit}
           ></login-form>
+        </div>
+      </div>
+    `;
+  }
+
+  private renderMockModeBanner() {
+    if (!this.isMockMode) {
+      return null;
+    }
+
+    const credentials = mockAuthService.getMockCredentials();
+
+    return html`
+      <div class="mock-mode-banner">
+        <div class="mock-mode-title">
+          <span class="mock-mode-icon">⚠️</span>
+          <span>Modo de Desarrollo</span>
+        </div>
+        <div>
+          El backend no está disponible. Usando datos de prueba locales.
+        </div>
+        <div class="mock-credentials">
+          <div class="mock-credentials-title">Credenciales de prueba:</div>
+          ${credentials.map(
+            (cred) => html`
+              <div class="credential-item">
+                <span class="credential-label">${cred.role}:</span>
+                ${cred.email} / ${cred.password}
+              </div>
+            `
+          )}
         </div>
       </div>
     `;
@@ -139,12 +233,28 @@ export class LoginView extends LitElement {
       const errorMsg =
         error instanceof Error ? error.message : 'Error desconocido';
 
+      // Improved error messages based on error type
       if (errorMsg.includes('401') || errorMsg.includes('credenciales')) {
+        this.errorMessage = this.isMockMode
+          ? 'Credenciales incorrectas. Usa las credenciales de prueba mostradas arriba.'
+          : 'Credenciales incorrectas. Por favor, verifica tu email y contraseña.';
+      } else if (
+        errorMsg.includes('network') ||
+        errorMsg.includes('fetch') ||
+        errorMsg.includes('Failed to fetch')
+      ) {
+        this.errorMessage = this.isMockMode
+          ? 'Error de conexión en modo de desarrollo. Verifica que estés usando las credenciales de prueba.'
+          : 'Error de conexión con el servidor. Por favor, verifica tu conexión a internet e intenta nuevamente.';
+      } else if (
+        errorMsg.includes('timeout') ||
+        errorMsg.includes('timed out')
+      ) {
         this.errorMessage =
-          'Credenciales incorrectas. Por favor, verifica tu email y contraseña.';
-      } else if (errorMsg.includes('network') || errorMsg.includes('fetch')) {
+          'La solicitud tardó demasiado tiempo. El servidor puede estar sobrecargado o tu conexión es lenta. Por favor, intenta nuevamente.';
+      } else if (errorMsg.includes('500') || errorMsg.includes('servidor')) {
         this.errorMessage =
-          'Error de conexión. Por favor, verifica tu conexión a internet.';
+          'Error del servidor. Por favor, intenta nuevamente en unos momentos.';
       } else {
         this.errorMessage =
           errorMsg || 'Error al iniciar sesión. Por favor, intenta nuevamente.';
