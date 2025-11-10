@@ -43,22 +43,22 @@
   - Add connection error detection
   - _Requirements: 1.2, 1.3, 2.3_
 
-- [ ] 5. Update School App Component
-  - [ ] 5.1 Integrate backend detection on startup
+- [x] 5. Update School App Component
+  - [x] 5.1 Integrate backend detection on startup
     - Import and initialize backend detector in school-app.ts
     - Call backend detection before auth validation
     - Handle detection results and activate appropriate mode
     - Update initialization flow to handle mock mode
     - _Requirements: 1.1, 1.4_
 
-  - [ ] 5.2 Improve error handling and user feedback
+  - [x] 5.2 Improve error handling and user feedback
     - Update error rendering to show specific connection errors
     - Add informative messages when backend is unavailable
     - Remove infinite loading state when backend is down
     - Show login view immediately if backend detection fails
     - _Requirements: 2.1, 2.3_
 
-- [ ] 6. Create Connection Status Component
+- [-] 6. Create Connection Status Component
   - Create `src/components/ui/connection-status.ts` component
   - Display badge showing connection state (connected/mock/error)
   - Add visual indicators with appropriate colors

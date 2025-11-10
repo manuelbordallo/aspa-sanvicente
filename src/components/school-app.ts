@@ -20,6 +20,8 @@ import type {
 import { authService } from '../services/auth-service.js';
 import { themeService } from '../services/theme-service.js';
 import { notificationService } from '../services/notification-service.js';
+import { authServiceFactory } from '../services/auth-service-factory.js';
+import { backendDetector } from '../services/backend-detector.js';
 import type { AuthState } from '../services/auth-service.js';
 
 // Import router
@@ -286,6 +288,9 @@ export class SchoolApp extends LitElement {
   @state() private currentPageTitle = 'Noticias';
   @state() private currentRouteComponent = 'news-view';
   @state() private routeLoading = false;
+  @state() private backendAvailable = false;
+  @state() private mockMode = false;
+  @state() private connectionError: string | null = null;
 
   @query('app-navigation') private navigation!: any;
 
@@ -348,6 +353,9 @@ export class SchoolApp extends LitElement {
     // Load initial settings
     await this.loadSettings();
 
+    // Detect backend availability and initialize auth service
+    await this.initializeBackendDetection();
+
     // Validate authentication
     await this.validateAuth();
 
@@ -365,6 +373,7 @@ export class SchoolApp extends LitElement {
     authService.removeAuthStateListener(this.handleAuthStateChange);
     themeService.removeThemeListener(this.handleThemeChange);
     notificationService.removeListener(this.handleNotification);
+    backendDetector.removeStatusListener(this.handleBackendStatusChange);
   }
 
   private initializeTheme(): void {
@@ -457,10 +466,67 @@ export class SchoolApp extends LitElement {
     }
   }
 
+  private async initializeBackendDetection(): Promise<void> {
+    try {
+      // Initialize auth service factory (which checks backend availability)
+      await authServiceFactory.initialize();
+
+      // Get backend status
+      this.backendAvailable = backendDetector.isBackendAvailable();
+      this.mockMode = authServiceFactory.isMockMode();
+
+      // Setup backend status listener
+      backendDetector.addStatusListener(this.handleBackendStatusChange);
+
+      // Log mode for debugging
+      if (this.mockMode) {
+        console.log(
+          '[SchoolApp] Running in mock mode - backend unavailable or mock mode enabled'
+        );
+        this.connectionError = null; // Clear any connection errors in mock mode
+      } else {
+        console.log('[SchoolApp] Running in real mode - backend available');
+        this.connectionError = null;
+      }
+    } catch (error) {
+      console.error('[SchoolApp] Error during backend detection:', error);
+      // Fallback to mock mode on error
+      this.mockMode = true;
+      this.backendAvailable = false;
+      this.connectionError =
+        'No se pudo conectar con el servidor. Usando modo de desarrollo.';
+    }
+  }
+
+  private handleBackendStatusChange = (available: boolean): void => {
+    this.backendAvailable = available;
+
+    if (available && this.mockMode) {
+      // Backend became available while in mock mode
+      this.addNotification({
+        type: 'success',
+        title: 'Conexión Restaurada',
+        message: 'El servidor está disponible nuevamente.',
+        duration: 5000,
+      });
+    } else if (!available && !this.mockMode) {
+      // Backend became unavailable while in real mode
+      this.addNotification({
+        type: 'warning',
+        title: 'Conexión Perdida',
+        message: 'No se puede conectar con el servidor.',
+        duration: 5000,
+      });
+    }
+  };
+
   private async validateAuth(): Promise<void> {
     try {
-      if (authService.isAuthenticated()) {
-        const isValid = await authService.validateToken();
+      // Get the appropriate auth service (real or mock)
+      const currentAuthService = await authServiceFactory.getAuthService();
+
+      if (currentAuthService.isAuthenticated()) {
+        const isValid = await currentAuthService.validateToken();
         if (!isValid) {
           this.navigateToLogin();
         }
@@ -472,6 +538,8 @@ export class SchoolApp extends LitElement {
       }
     } catch (error) {
       console.error('Auth validation error:', error);
+      // Don't treat auth validation errors as fatal - show login instead
+      this.connectionError = null;
       this.navigateToLogin();
     }
   }
@@ -583,6 +651,31 @@ export class SchoolApp extends LitElement {
     }
   }
 
+  private async retryConnection(): Promise<void> {
+    // Show loading state
+    this.authState = { ...this.authState, isLoading: true };
+    this.connectionError = null;
+
+    try {
+      // Re-initialize backend detection
+      await this.initializeBackendDetection();
+
+      // If backend is now available, reload the page
+      if (this.backendAvailable && !this.mockMode) {
+        window.location.reload();
+      } else {
+        // Still in mock mode, navigate to login
+        this.authState = { ...this.authState, isLoading: false };
+        this.navigateToLogin();
+      }
+    } catch (error) {
+      console.error('Retry connection error:', error);
+      this.authState = { ...this.authState, isLoading: false };
+      this.connectionError =
+        'No se pudo restablecer la conexión. Intenta nuevamente.';
+    }
+  }
+
   private getUserInitials(): string {
     const user = this.authState.user;
     if (!user) return 'U';
@@ -624,12 +717,19 @@ export class SchoolApp extends LitElement {
   }
 
   render() {
-    if (!this.initialized || this.authState.isLoading) {
+    // Show loading only during initial setup
+    if (!this.initialized && this.authState.isLoading) {
       return this.renderLoading();
     }
 
-    if (this.authState.error) {
+    // Show error only if there's a critical error and not in mock mode
+    if (this.authState.error && !this.mockMode) {
       return this.renderError();
+    }
+
+    // If connection error but in mock mode, show login
+    if (this.connectionError && this.mockMode) {
+      return html`<login-view></login-view>`;
     }
 
     // Show login view if not authenticated
@@ -650,15 +750,54 @@ export class SchoolApp extends LitElement {
   }
 
   private renderError() {
+    // Determine error message
+    let errorTitle = 'Error de conexión';
+    let errorMessage =
+      this.connectionError ||
+      this.authState.error ||
+      'Ha ocurrido un error inesperado';
+
+    // If in mock mode, don't show as error - show login instead
+    if (this.mockMode && !this.authState.error) {
+      return html`<login-view></login-view>`;
+    }
+
+    // Show specific error messages based on error type
+    if (
+      errorMessage.includes('fetch') ||
+      errorMessage.includes('Network') ||
+      errorMessage.includes('Timeout')
+    ) {
+      errorTitle = 'No se puede conectar con el servidor';
+      errorMessage =
+        'El servidor no está disponible. Por favor, verifica tu conexión o intenta más tarde.';
+    }
+
     return html`
       <div class="error-container">
-        <div class="error-title">Error de conexión</div>
-        <div class="error-message">
-          ${this.authState.error || 'Ha ocurrido un error inesperado'}
-        </div>
-        <button class="retry-button" @click=${() => window.location.reload()}>
-          Reintentar
-        </button>
+        <div class="error-title">${errorTitle}</div>
+        <div class="error-message">${errorMessage}</div>
+        ${this.mockMode
+          ? html`
+              <div class="error-message" style="margin-top: 1rem;">
+                <strong>Modo de desarrollo activo:</strong> Puedes continuar
+                usando la aplicación con datos de prueba.
+              </div>
+              <button
+                class="retry-button"
+                @click=${() => this.navigateToLogin()}
+              >
+                Ir al Login
+              </button>
+            `
+          : html`
+              <button
+                class="retry-button"
+                @click=${() => this.retryConnection()}
+              >
+                Reintentar Conexión
+              </button>
+            `}
       </div>
     `;
   }
