@@ -58,7 +58,7 @@
     - Show login view immediately if backend detection fails
     - _Requirements: 2.1, 2.3_
 
-- [-] 6. Create Connection Status Component
+- [x] 6. Create Connection Status Component
   - Create `src/components/ui/connection-status.ts` component
   - Display badge showing connection state (connected/mock/error)
   - Add visual indicators with appropriate colors
@@ -66,7 +66,7 @@
   - Subscribe to backend detector status changes
   - _Requirements: 2.1, 2.2, 2.4_
 
-- [ ] 7. Add Environment Configuration
+- [-] 7. Add Environment Configuration
   - Update `.env.development` with mock mode and timeout settings
   - Add VITE_ENABLE_MOCK_MODE variable
   - Add VITE_BACKEND_DETECTION_TIMEOUT variable

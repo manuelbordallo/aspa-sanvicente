@@ -8,6 +8,7 @@ export { UILoading } from './ui-loading.js';
 export { UIEmptyState } from './ui-empty-state.js';
 export { UIToast } from './ui-toast.js';
 export { UIConfirm } from './ui-confirm.js';
+export { ConnectionStatus } from './connection-status.js';
 
 // Re-export for convenience
 export * from './ui-button.js';
@@ -17,3 +18,4 @@ export * from './ui-modal.js';
 export * from './ui-select.js';
 export * from './ui-toast.js';
 export * from './ui-confirm.js';
+export * from './connection-status.js';
