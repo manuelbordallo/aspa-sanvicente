@@ -205,10 +205,10 @@ If issues occur after deployment:
 
 ## Sign-Off
 
-- [ ] Developer: ********\_******** Date: **\_\_\_**
-- [ ] QA: ********\_******** Date: **\_\_\_**
-- [ ] DevOps: ********\_******** Date: **\_\_\_**
-- [ ] Product Owner: ********\_******** Date: **\_\_\_**
+- [ ] Developer: **\*\*\*\***\_**\*\*\*\*** Date: **\_\_\_**
+- [ ] QA: **\*\*\*\***\_**\*\*\*\*** Date: **\_\_\_**
+- [ ] DevOps: **\*\*\*\***\_**\*\*\*\*** Date: **\_\_\_**
+- [ ] Product Owner: **\*\*\*\***\_**\*\*\*\*** Date: **\_\_\_**
 
 ## Notes
 
@@ -216,6 +216,6 @@ Additional notes or special considerations for this deployment:
 
 ---
 
-**Deployment Date**: ******\_\_\_******
-**Version**: ******\_\_\_******
-**Deployed By**: ******\_\_\_******
+**Deployment Date**: **\*\***\_\_\_**\*\***
+**Version**: **\*\***\_\_\_**\*\***
+**Deployed By**: **\*\***\_\_\_**\*\***

@@ -38,3 +38,7 @@ export type {
   NotificationOptions,
   NotificationType,
 } from './notification-service.js';
+
+// Backend Detector Service
+export { BackendDetectorService, backendDetector } from './backend-detector.js';
+export type { BackendStatus } from './backend-detector.js';
