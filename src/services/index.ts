@@ -20,20 +20,29 @@ export { SettingsService, settingsService } from './settings-service.js';
 export type { LanguageOption } from './settings-service.js';
 
 // Entity Services
-export { NewsService, newsService } from './news-service.js';
+export { NewsService } from './news-service.js';
 export type { NewsFilters, NewsPaginationOptions } from './news-service.js';
+export { newsServiceFactory, newsService } from './news-service-factory.js';
 
-export { NoticeService, noticeService } from './notice-service.js';
+export { NoticeService } from './notice-service.js';
 export type {
   NoticeFilters,
   NoticePaginationOptions,
 } from './notice-service.js';
+export {
+  noticeServiceFactory,
+  noticeService,
+} from './notice-service-factory.js';
 
-export { CalendarService, calendarService } from './calendar-service.js';
+export { CalendarService } from './calendar-service.js';
 export type {
   CalendarFilters,
   CalendarPaginationOptions,
 } from './calendar-service.js';
+export {
+  calendarServiceFactory,
+  calendarService,
+} from './calendar-service-factory.js';
 
 export { UserService, userService } from './user-service.js';
 export type { UserFilters, UserPaginationOptions } from './user-service.js';

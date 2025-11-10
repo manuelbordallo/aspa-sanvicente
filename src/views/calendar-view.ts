@@ -1,7 +1,7 @@
 import { LitElement, html, css } from 'lit';
 import { customElement, state, property } from 'lit/decorators.js';
 import { consume } from '@lit/context';
-import { calendarService } from '../services/calendar-service.js';
+import { calendarService } from '../services/calendar-service-factory.js';
 import { notificationService } from '../services/notification-service.js';
 import type { CalendarEvent } from '../types/index.js';
 import { authContext, type AuthContextValue } from '../contexts/app-context.js';

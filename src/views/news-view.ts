@@ -1,7 +1,7 @@
 import { LitElement, html, css } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { consume } from '@lit/context';
-import { newsService } from '../services/news-service.js';
+import { newsService } from '../services/news-service-factory.js';
 import { notificationService } from '../services/notification-service.js';
 import { authContext, type AuthContextValue } from '../contexts/app-context.js';
 import type { News, PaginatedResponse, NewsFormData } from '../types/index.js';
@@ -27,6 +27,11 @@ export class NewsView extends LitElement {
   @state() private creating = false;
 
   private readonly pageSize = 10;
+
+  constructor() {
+    super();
+    console.log('[NewsView] Constructor called - component instantiated');
+  }
 
   static styles = css`
     :host {
@@ -335,15 +340,24 @@ export class NewsView extends LitElement {
   `;
 
   async connectedCallback() {
+    console.log('[NewsView] connectedCallback called');
     super.connectedCallback();
-    await this.loadNews();
+    console.log('[NewsView] About to load news...');
+    try {
+      await this.loadNews();
+      console.log('[NewsView] loadNews completed');
+    } catch (error) {
+      console.error('[NewsView] Error in connectedCallback:', error);
+    }
   }
 
   private async loadNews(page: number = 1) {
+    console.log('[NewsView] Loading news, page:', page);
     this.loading = true;
     this.error = null;
 
     try {
+      console.log('[NewsView] Calling newsService.getNews...');
       const response: PaginatedResponse<News> = await newsService.getNews({
         page,
         limit: this.pageSize,
@@ -351,20 +365,37 @@ export class NewsView extends LitElement {
         sortOrder: 'desc',
       });
 
+      console.log('[NewsView] Received response:', response);
+      console.log('[NewsView] Response data:', response.data);
+      console.log('[NewsView] About to assign news...');
+
       if (page === 1) {
         this.news = response.data;
+        console.log('[NewsView] Assigned news (page 1):', this.news);
       } else {
         this.news = [...this.news, ...response.data];
+        console.log('[NewsView] Assigned news (page >1):', this.news);
       }
+
+      console.log('[NewsView] News loaded:', this.news.length, 'items');
+      console.log('[NewsView] Setting pagination data...');
 
       this.currentPage = response.page;
       this.totalPages = Math.ceil(response.total / this.pageSize);
       this.hasMore = response.hasNext;
+
+      console.log('[NewsView] Pagination set. Calling requestUpdate...');
+      // Force update to ensure re-render
+      this.requestUpdate();
+      console.log('[NewsView] requestUpdate called!');
     } catch (error) {
+      console.error('[NewsView] Error loading news:', error);
       this.error =
         error instanceof Error ? error.message : 'Error al cargar las noticias';
     } finally {
       this.loading = false;
+      // Force update after loading state changes
+      this.requestUpdate();
     }
   }
 
@@ -578,6 +609,14 @@ export class NewsView extends LitElement {
   }
 
   render() {
+    console.log(
+      '[NewsView] Rendering, news count:',
+      this.news.length,
+      'loading:',
+      this.loading,
+      'error:',
+      this.error
+    );
     const canCreateNews = this.auth?.user?.role === 'admin';
 
     return html`

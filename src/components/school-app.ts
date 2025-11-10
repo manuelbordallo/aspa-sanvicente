@@ -688,6 +688,13 @@ export class SchoolApp extends LitElement {
   }
 
   private renderCurrentView() {
+    console.log(
+      '[SchoolApp] renderCurrentView called, component:',
+      this.currentRouteComponent,
+      'loading:',
+      this.routeLoading
+    );
+
     // Show loading state while route is loading
     if (this.routeLoading) {
       return html`<ui-loading
@@ -702,6 +709,7 @@ export class SchoolApp extends LitElement {
           @login-success=${this.handleLoginSuccess}
         ></login-view>`;
       case 'news-view':
+        console.log('[SchoolApp] Rendering news-view');
         return html`<news-view></news-view>`;
       case 'notices-view':
         return html`<notices-view></notices-view>`;

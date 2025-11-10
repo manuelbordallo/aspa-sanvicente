@@ -1,7 +1,7 @@
 import { LitElement, html, css } from 'lit';
 import { customElement, state } from 'lit/decorators.js';
 import { consume } from '@lit/context';
-import { noticeService } from '../services/notice-service.js';
+import { noticeService } from '../services/notice-service-factory.js';
 import { notificationService } from '../services/notification-service.js';
 import { authContext, type AuthContextValue } from '../contexts/app-context.js';
 import type { Notice, User, NoticeFormData } from '../types/index.js';
