@@ -43,9 +43,13 @@ VITE_ENABLE_MOCK_MODE=true npm run dev
 
 Cuando el modo mock está activo, verás:
 
-1. **Badge de conexión** en la esquina superior derecha con estado "Modo Mock"
-2. **Mensaje en la consola**: "🔧 Running in MOCK mode"
-3. **Ayuda en el login** mostrando las credenciales de prueba disponibles
+1. **Banner amarillo en el login** con el título "Modo de Desarrollo" mostrando las credenciales de prueba
+2. **Mensajes en la consola del navegador** (F12):
+   - `🔧 [AuthServiceFactory] Mock mode enabled via environment variable`
+   - `[Mock Auth] Mock authentication service initialized`
+3. **Datos de ejemplo** en todas las secciones (noticias, avisos, calendario)
+
+Si no ves estos indicadores, el modo mock no está activo correctamente.
 
 ## Credenciales Mock
 
@@ -128,23 +132,40 @@ VITE_API_TIMEOUT=10000
 1. El backend no está disponible y el modo mock no se activó
 2. Error de JavaScript en la consola
 3. Problema con las variables de entorno
+4. El servidor de desarrollo necesita ser reiniciado después de cambios en .env
 
 **Soluciones**:
 
 ```bash
 # 1. Verifica la consola del navegador (F12) para errores
-# 2. Fuerza el modo mock
-VITE_ENABLE_MOCK_MODE=true npm run dev
+# Busca mensajes de error en rojo
 
-# 3. Limpia el caché y localStorage
-# En la consola del navegador:
+# 2. Verifica que el modo mock esté habilitado en .env.development
+# El archivo debe contener:
+VITE_ENABLE_MOCK_MODE=true
+
+# 3. Reinicia el servidor de desarrollo (IMPORTANTE)
+# Las variables de entorno solo se cargan al iniciar
+# Ctrl+C para detener
+npm run dev
+
+# 4. Limpia el caché del navegador
+# Recarga la página con Ctrl+Shift+R (o Cmd+Shift+R en Mac)
+
+# 5. Limpia localStorage si persiste el problema
+# En la consola del navegador (F12):
 localStorage.clear()
-# Luego recarga la página (Ctrl+Shift+R)
+# Luego recarga la página
 
-# 4. Verifica que las variables de entorno estén cargadas
+# 6. Verifica que las variables de entorno estén cargadas
 # En la consola del navegador:
 console.log(import.meta.env)
+# Deberías ver VITE_ENABLE_MOCK_MODE: true
+
+# 7. Si ves "🔧 Running in MOCK mode" en la consola, el modo mock está activo
 ```
+
+**Nota Importante**: Después de modificar archivos `.env`, **siempre debes reiniciar el servidor de desarrollo** para que los cambios surtan efecto.
 
 ### Problema: "Cannot connect to backend"
 

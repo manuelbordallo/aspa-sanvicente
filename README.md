@@ -78,12 +78,27 @@ src/
 
 ### Desarrollo sin Backend
 
-La aplicación incluye un **modo mock** que permite desarrollar sin necesidad de un backend activo. El modo se activa automáticamente si el backend no está disponible.
+La aplicación incluye un **modo mock** que permite desarrollar sin necesidad de un backend activo.
+
+### Inicio Rápido en Modo Mock
+
+```bash
+# 1. Verifica que .env.development tenga:
+# VITE_ENABLE_MOCK_MODE=true
+
+# 2. Inicia el servidor
+npm run dev
+
+# 3. Abre http://localhost:3000
+# Verás un banner amarillo con las credenciales de prueba
+```
 
 **Credenciales de prueba:**
 
 - Admin: `admin@example.com` / `admin123`
 - Usuario: `user@example.com` / `user123`
+
+**Nota**: Si ves una pantalla en blanco, reinicia el servidor de desarrollo (Ctrl+C y luego `npm run dev`).
 
 Ver [DEVELOPMENT.md](./DEVELOPMENT.md) para más detalles sobre desarrollo sin backend y troubleshooting.
 

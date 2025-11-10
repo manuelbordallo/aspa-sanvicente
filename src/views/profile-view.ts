@@ -3,7 +3,7 @@ import { customElement, state } from 'lit/decorators.js';
 import { consume } from '@lit/context';
 import { authContext } from '../contexts/index.js';
 import type { AuthContextValue } from '../contexts/index.js';
-import { authService } from '../services/auth-service.js';
+import { authService } from '../services/auth-service-factory.js';
 import { notificationService } from '../services/notification-service.js';
 import { ValidationService } from '../utils/validators.js';
 import type { User, PasswordChangeData, FormError } from '../types/index.js';

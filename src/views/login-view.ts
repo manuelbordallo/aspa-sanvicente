@@ -1,7 +1,9 @@
 import { LitElement, html, css } from 'lit';
 import { customElement, state, query } from 'lit/decorators.js';
-import { authService } from '../services/auth-service.js';
-import { authServiceFactory } from '../services/auth-service-factory.js';
+import {
+  authService,
+  authServiceFactory,
+} from '../services/auth-service-factory.js';
 import { mockAuthService } from '../services/mock-auth-service.js';
 import type { LoginFormData } from '../types/index.js';
 import '../components/forms/login-form.js';
@@ -211,13 +213,17 @@ export class LoginView extends LitElement {
   }
 
   private async handleLoginSubmit(event: CustomEvent<LoginFormData>) {
+    console.log('[LoginView] Received login-submit event:', event.detail);
     const credentials = event.detail;
 
     this.isLoading = true;
     this.errorMessage = '';
 
+    console.log('[LoginView] Attempting login with:', credentials);
+
     try {
       await authService.login(credentials);
+      console.log('[LoginView] Login successful');
 
       // Clear form
       if (this.loginForm) {

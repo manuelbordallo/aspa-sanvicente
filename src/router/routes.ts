@@ -1,6 +1,6 @@
 import { html, TemplateResult } from 'lit';
 import type { UserRole } from '../types/index.js';
-import { authService } from '../services/auth-service.js';
+import { authService } from '../services/auth-service-factory.js';
 
 export interface RouteConfig {
   path: string;

@@ -3,7 +3,7 @@
  * Creates and provides the appropriate auth service instance based on configuration
  */
 
-import { AuthService, authService } from './auth-service.js';
+import { AuthService, authService as realAuthService } from './auth-service.js';
 import { MockAuthService, mockAuthService } from './mock-auth-service.js';
 import { backendDetector } from './backend-detector.js';
 import { config } from '../config/index.js';
@@ -39,7 +39,7 @@ class AuthServiceFactory {
       this.mockMode = true;
       this.serviceInstance = mockAuthService;
       console.log(
-        '[AuthServiceFactory] Mock mode enabled via environment variable'
+        '🔧 [AuthServiceFactory] Mock mode enabled via environment variable'
       );
       this.initialized = true;
       return;
@@ -50,7 +50,7 @@ class AuthServiceFactory {
 
     if (backendAvailable) {
       this.mockMode = false;
-      this.serviceInstance = authService;
+      this.serviceInstance = realAuthService;
       if (config.debug) {
         console.log(
           '[AuthServiceFactory] Using real auth service - backend available'
@@ -60,7 +60,7 @@ class AuthServiceFactory {
       this.mockMode = true;
       this.serviceInstance = mockAuthService;
       console.log(
-        '[AuthServiceFactory] Using mock auth service - backend unavailable'
+        '🔧 [AuthServiceFactory] Using mock auth service - backend unavailable'
       );
     }
 
@@ -89,7 +89,11 @@ class AuthServiceFactory {
    */
   getAuthServiceSync(): AuthServiceInstance {
     if (!this.initialized || !this.serviceInstance) {
-      throw new Error('Auth service not initialized. Call initialize() first.');
+      // Fallback to mock service if not initialized
+      console.warn(
+        '[AuthServiceFactory] Service not initialized, using mock service as fallback'
+      );
+      return mockAuthService;
     }
 
     return this.serviceInstance;
@@ -128,7 +132,7 @@ class AuthServiceFactory {
 
     if (backendAvailable) {
       this.mockMode = false;
-      this.serviceInstance = authService;
+      this.serviceInstance = realAuthService;
       console.log('[AuthServiceFactory] Switched to real mode');
       return true;
     }
@@ -152,3 +156,18 @@ class AuthServiceFactory {
 
 // Create and export singleton instance
 export const authServiceFactory = new AuthServiceFactory();
+
+// Export a proxy that automatically delegates to the correct service
+export const authService = new Proxy({} as AuthServiceInstance, {
+  get(_target, prop) {
+    const service = authServiceFactory.getAuthServiceSync();
+    const value = (service as any)[prop];
+
+    // If it's a function, bind it to the service
+    if (typeof value === 'function') {
+      return value.bind(service);
+    }
+
+    return value;
+  },
+});

@@ -42,7 +42,10 @@ export class MockAuthService {
   private authStateListeners: ((state: AuthState) => void)[] = [];
 
   constructor() {
-    console.log('[Mock Auth] Mock authentication service initialized');
+    console.log('🔧 [Mock Auth] Mock authentication service initialized');
+    console.log('📝 [Mock Auth] Available test credentials:');
+    console.log('   Admin: admin@example.com / admin123');
+    console.log('   User: user@example.com / user123');
     this.initializeAuth();
     this.setupEventListeners();
   }

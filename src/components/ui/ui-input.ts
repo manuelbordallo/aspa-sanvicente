@@ -159,11 +159,23 @@ export class UIInput extends LitElement {
   }
 
   private _handleFocus() {
-    // Focus handling can be added here if needed
+    this.dispatchEvent(
+      new CustomEvent('ui-focus', {
+        bubbles: true,
+        composed: true,
+        detail: { value: this.value, name: this.name },
+      })
+    );
   }
 
   private _handleBlur() {
-    // Blur handling can be added here if needed
+    this.dispatchEvent(
+      new CustomEvent('ui-blur', {
+        bubbles: true,
+        composed: true,
+        detail: { value: this.value, name: this.name },
+      })
+    );
   }
 }
 

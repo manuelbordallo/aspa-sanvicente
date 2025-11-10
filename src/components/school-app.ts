@@ -17,10 +17,12 @@ import type {
 } from '../contexts/index.js';
 
 // Import services
-import { authService } from '../services/auth-service.js';
+import {
+  authService,
+  authServiceFactory,
+} from '../services/auth-service-factory.js';
 import { themeService } from '../services/theme-service.js';
 import { notificationService } from '../services/notification-service.js';
-import { authServiceFactory } from '../services/auth-service-factory.js';
 import { backendDetector } from '../services/backend-detector.js';
 import type { AuthState } from '../services/auth-service.js';
 

@@ -144,7 +144,7 @@ export class LoginForm extends LitElement {
             variant="primary"
             size="lg"
             .loading=${this.loading}
-            .disabled=${!this._isFormValid()}
+            @click=${this._handleButtonClick}
           >
             ${this.loading ? 'Iniciando sesión...' : 'Iniciar sesión'}
           </ui-button>
@@ -159,12 +159,21 @@ export class LoginForm extends LitElement {
     `;
   }
 
+  private _handleButtonClick(event: Event) {
+    console.log('[LoginForm] Button clicked!');
+    event.preventDefault();
+    event.stopPropagation();
+    // Call submit handler directly since form submit event doesn't work with Shadow DOM
+    this._handleSubmit(event);
+  }
+
   private _handleEmailInput(event: CustomEvent) {
     this._formData = {
       ...this._formData,
       email: event.detail.value,
     };
-    this._validateField('email');
+    // Don't validate on input, only on submit
+    this.requestUpdate();
   }
 
   private _handlePasswordInput(event: CustomEvent) {
@@ -172,32 +181,49 @@ export class LoginForm extends LitElement {
       ...this._formData,
       password: event.detail.value,
     };
-    this._validateField('password');
+    // Don't validate on input, only on submit
+    this.requestUpdate();
   }
 
   private _handleSubmit(event: Event) {
+    console.log('[LoginForm] _handleSubmit called!', event);
     event.preventDefault();
 
-    if (this.loading) return;
-
-    // Mark all fields as touched
-    this._touched = {
-      email: true,
-      password: true,
-    };
-
-    // Validate all fields
-    this._validateAllFields();
-
-    if (this._isFormValid()) {
-      this.dispatchEvent(
-        new CustomEvent('login-submit', {
-          bubbles: true,
-          composed: true,
-          detail: { ...this._formData },
-        })
-      );
+    if (this.loading) {
+      console.log('[LoginForm] Already loading, ignoring submit');
+      return;
     }
+
+    console.log('[LoginForm] Submit attempt:', this._formData);
+
+    // Simple validation: just check if fields have content
+    const hasEmail = this._formData.email.trim().length > 0;
+    const hasPassword = this._formData.password.trim().length > 0;
+
+    console.log('[LoginForm] Validation:', { hasEmail, hasPassword });
+
+    if (!hasEmail || !hasPassword) {
+      console.log('[LoginForm] Missing fields, marking as touched');
+      // Mark all fields as touched to show errors
+      this._touched = {
+        email: true,
+        password: true,
+      };
+      // Validate to show error messages
+      this._validateAllFields();
+      this.requestUpdate();
+      return;
+    }
+
+    // Form is valid, dispatch event
+    console.log('[LoginForm] Form is valid, dispatching login-submit event');
+    this.dispatchEvent(
+      new CustomEvent('login-submit', {
+        bubbles: true,
+        composed: true,
+        detail: { ...this._formData },
+      })
+    );
   }
 
   private _validateField(fieldName: keyof LoginFormData) {
@@ -260,16 +286,6 @@ export class LoginForm extends LitElement {
 
     const error = this._errors.find((error) => error.field === fieldName);
     return error?.message || '';
-  }
-
-  private _isFormValid(): boolean {
-    return !!(
-      this._formData.email &&
-      this._formData.password &&
-      this._errors.length === 0 &&
-      ValidationService.validateEmail(this._formData.email) &&
-      this._formData.password.length >= 6
-    );
   }
 
   reset() {
