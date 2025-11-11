@@ -197,8 +197,16 @@ export class MockNoticeService {
     await new Promise((resolve) => setTimeout(resolve, 300));
 
     const allNotices = this.getData();
+    console.log(
+      '[Mock Notices] All notices from storage:',
+      allNotices.length,
+      'items'
+    );
     const filtered = this.applyFilters(allNotices, filters);
-    return this.applyPagination(filtered, options);
+    console.log('[Mock Notices] Filtered notices:', filtered.length, 'items');
+    const result = this.applyPagination(filtered, options);
+    console.log('[Mock Notices] Returning paginated result:', result);
+    return result;
   }
 
   /**

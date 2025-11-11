@@ -11,6 +11,8 @@ import '../components/ui/ui-modal.js';
 import '../components/ui/ui-loading.js';
 import '../components/forms/notice-form.js';
 
+console.log('[NoticesView] Module loaded - notices-view.ts executed');
+
 @customElement('notices-view')
 export class NoticesView extends LitElement {
   @consume({ context: authContext, subscribe: true })
@@ -26,12 +28,19 @@ export class NoticesView extends LitElement {
   @state() private availableUsers: User[] = [];
   @state() private creatingNotice = false;
 
+  constructor() {
+    super();
+    console.log('[NoticesView] Constructor called - component instantiated');
+  }
+
   static styles = css`
     :host {
       display: block;
       padding: 1.5rem;
       max-width: 1200px;
       margin: 0 auto;
+      min-height: 100vh;
+      background-color: transparent;
     }
 
     .view-header {
@@ -254,31 +263,117 @@ export class NoticesView extends LitElement {
     }
   `;
 
-  async connectedCallback() {
+  connectedCallback() {
+    console.log('[NoticesView] connectedCallback called');
+    console.log('[NoticesView] Initial state:', {
+      authState: this.authState,
+      isAuthenticated: this.authState?.isAuthenticated,
+      user: this.authState?.user,
+      notices: this.notices.length,
+      loading: this.loading,
+    });
     super.connectedCallback();
-    await this.loadNotices();
-    await this.loadUnreadCount();
+    console.log('[NoticesView] super.connectedCallback() completed');
+    console.log('[NoticesView] About to load notices and unread count...');
+
+    // Load data asynchronously after connection
+    this.loadInitialData();
+  }
+
+  private async loadInitialData() {
+    console.log('[NoticesView] loadInitialData called');
+
+    // Wait for the component to be fully updated and context to be available
+    await this.updateComplete;
+
+    console.log('[NoticesView] After updateComplete, authState:', {
+      authState: this.authState,
+      isAuthenticated: this.authState?.isAuthenticated,
+    });
+
+    // Wait a bit more for context to be fully available
+    // This helps ensure the auth context is properly propagated
+    if (!this.authState?.isAuthenticated) {
+      console.log(
+        '[NoticesView] Auth state not ready, waiting for next update...'
+      );
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      await this.updateComplete;
+      console.log('[NoticesView] After additional wait, authState:', {
+        authState: this.authState,
+        isAuthenticated: this.authState?.isAuthenticated,
+      });
+    }
+
+    // Only load if authenticated
+    if (this.authState?.isAuthenticated) {
+      await this.loadNotices();
+      await this.loadUnreadCount();
+      console.log('[NoticesView] Load complete, final state:', {
+        notices: this.notices.length,
+        unreadCount: this.unreadCount,
+        loading: this.loading,
+        error: this.error,
+      });
+    } else {
+      console.log(
+        '[NoticesView] Not authenticated in loadInitialData, skipping data load'
+      );
+    }
   }
 
   private async loadNotices() {
-    if (!this.authState?.isAuthenticated) return;
+    console.log(
+      '[NoticesView] loadNotices called, authenticated:',
+      this.authState?.isAuthenticated
+    );
+
+    // Wait for auth state to be available
+    if (!this.authState) {
+      console.log('[NoticesView] Auth state not available yet, waiting...');
+      await this.updateComplete;
+      console.log(
+        '[NoticesView] After updateComplete, authState:',
+        this.authState
+      );
+    }
+
+    if (!this.authState?.isAuthenticated) {
+      console.log('[NoticesView] Not authenticated, skipping load');
+      return;
+    }
 
     this.loading = true;
     this.error = null;
 
     try {
       const filters = this.showAll ? {} : { isRead: false };
+      console.log(
+        '[NoticesView] Calling noticeService.getNotices with filters:',
+        filters
+      );
       const response = await noticeService.getNotices(
         { sortBy: 'createdAt', sortOrder: 'desc' },
         filters
       );
+      console.log('[NoticesView] Received response:', response);
       this.notices = response.data;
+      console.log(
+        '[NoticesView] Notices loaded:',
+        this.notices.length,
+        'items'
+      );
+      // Force update to ensure re-render
+      this.requestUpdate();
+      console.log('[NoticesView] requestUpdate called');
     } catch (error) {
       this.error =
         error instanceof Error ? error.message : 'Error al cargar los avisos';
-      console.error('Error loading notices:', error);
+      console.error('[NoticesView] Error loading notices:', error);
     } finally {
       this.loading = false;
+      // Force update after loading state changes
+      this.requestUpdate();
     }
   }
 
@@ -485,13 +580,46 @@ export class NoticesView extends LitElement {
   }
 
   render() {
-    if (!this.authState?.isAuthenticated) {
+    console.log('[NoticesView] render() called');
+    console.log('[NoticesView] Render state:', {
+      noticesCount: this.notices.length,
+      loading: this.loading,
+      authenticated: this.authState?.isAuthenticated,
+      authState: this.authState,
+      error: this.error,
+      showAll: this.showAll,
+      unreadCount: this.unreadCount,
+    });
+
+    // Check if authState is available and authenticated
+    if (!this.authState) {
+      console.log(
+        '[NoticesView] Auth state not available yet, showing loading spinner'
+      );
       return html`
         <div class="loading-state">
           <div class="spinner"></div>
         </div>
       `;
     }
+
+    if (!this.authState.isAuthenticated) {
+      console.log('[NoticesView] Not authenticated, showing loading spinner');
+      return html`
+        <div class="loading-state">
+          <div class="spinner"></div>
+        </div>
+      `;
+    }
+
+    console.log('[NoticesView] Authenticated, rendering main content');
+    console.log('[NoticesView] About to return HTML template');
+    console.log('[NoticesView] Final render decision:', {
+      showLoading: this.loading,
+      showEmpty: !this.loading && this.notices.length === 0,
+      showNotices: !this.loading && this.notices.length > 0,
+      noticesCount: this.notices.length,
+    });
 
     return html`
       <div class="view-header">

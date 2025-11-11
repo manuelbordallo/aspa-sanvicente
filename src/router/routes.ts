@@ -188,18 +188,39 @@ export class SimpleRouter {
   }
 
   private async handleRouteChange(): Promise<void> {
-    if (this.loadingRoute) return;
+    console.log(
+      '[Router] handleRouteChange called, path:',
+      window.location.pathname
+    );
+    console.log('[Router] Current state:', {
+      loadingRoute: this.loadingRoute,
+      currentRoute: this.currentRoute?.name,
+      loadedComponents: Array.from(this.loadedComponents),
+    });
+
+    if (this.loadingRoute) {
+      console.log('[Router] Already loading a route, skipping');
+      return;
+    }
 
     const path = window.location.pathname;
     const route = this.findRoute(path);
+    console.log(
+      '[Router] Found route:',
+      route?.name,
+      'component:',
+      route?.component
+    );
 
     if (route) {
       // Check route guard
       if (!RouteGuard.canActivate(route)) {
+        console.log('[Router] Route guard failed for:', route.name);
         const redirectPath = RouteGuard.getRedirectPath(route);
         if (redirectPath !== route.path) {
           // Prevent infinite redirect loop
           if (window.location.pathname !== redirectPath) {
+            console.log('[Router] Redirecting to:', redirectPath);
             this.navigate(redirectPath);
           }
           return;
@@ -213,33 +234,90 @@ export class SimpleRouter {
 
       // Lazy load component if needed
       if (route.lazyLoad && !this.loadedComponents.has(route.component)) {
+        console.log(
+          '[Router] Starting lazy load for component:',
+          route.component
+        );
         this.loadingRoute = true;
         try {
           await route.lazyLoad();
-          this.loadedComponents.add(route.component);
+          console.log('[Router] Component module loaded:', route.component);
+
+          // Verify component registration with customElements.get()
+          const isRegistered = customElements.get(route.component);
+          if (isRegistered) {
+            console.log(
+              '[Router] Component successfully registered:',
+              route.component
+            );
+            this.loadedComponents.add(route.component);
+          } else {
+            console.error(
+              '[Router] Component failed to register:',
+              route.component
+            );
+            console.error(
+              '[Router] The component module was loaded but the custom element was not defined'
+            );
+            throw new Error(
+              `Component ${route.component} failed to register after module load`
+            );
+          }
         } catch (error) {
-          console.error(`Error loading component ${route.component}:`, error);
+          console.error(
+            `[Router] Error loading component ${route.component}:`,
+            error
+          );
+          if (error instanceof Error) {
+            console.error('[Router] Error name:', error.name);
+            console.error('[Router] Error message:', error.message);
+            console.error('[Router] Error stack:', error.stack);
+          }
+          // Dispatch error event for UI to handle
+          window.dispatchEvent(
+            new CustomEvent('route:load-error', {
+              detail: {
+                component: route.component,
+                route: route.path,
+                error: error instanceof Error ? error.message : String(error),
+              },
+            })
+          );
         } finally {
           this.loadingRoute = false;
+          console.log('[Router] Lazy load complete for:', route.component);
         }
+      } else if (this.loadedComponents.has(route.component)) {
+        console.log('[Router] Component already loaded:', route.component);
+      } else {
+        console.log('[Router] No lazy load needed for:', route.component);
       }
 
       this.currentRoute = route;
+      console.log('[Router] Current route set to:', route.name);
     } else {
+      console.log('[Router] No route found for path:', path);
       // Default to news if route not found and authenticated
       if (authService.isAuthenticated()) {
         if (window.location.pathname !== '/news') {
+          console.log(
+            '[Router] Redirecting to /news (authenticated, no route found)'
+          );
           this.navigate('/news');
         }
         return;
       } else {
         if (window.location.pathname !== '/login') {
+          console.log(
+            '[Router] Redirecting to /login (not authenticated, no route found)'
+          );
           this.navigate('/login');
         }
         return;
       }
     }
 
+    console.log('[Router] Notifying listeners');
     this.notifyListeners();
   }
 

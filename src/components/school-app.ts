@@ -697,14 +697,43 @@ export class SchoolApp extends LitElement {
 
     // Show loading state while route is loading
     if (this.routeLoading) {
+      console.log('[SchoolApp] Showing loading state for route');
       return html`<ui-loading
         size="lg"
         message="Cargando vista..."
       ></ui-loading>`;
     }
 
+    // Verify that the custom element is registered before attempting to render
+    const isRegistered = customElements.get(this.currentRouteComponent);
+    console.log(
+      '[SchoolApp] Component registration status:',
+      this.currentRouteComponent,
+      'registered:',
+      !!isRegistered
+    );
+
+    // If component is not registered yet, show loading state
+    if (!isRegistered) {
+      console.warn(
+        '[SchoolApp] Component not registered yet:',
+        this.currentRouteComponent,
+        '- showing loading state'
+      );
+      return html`<ui-loading
+        size="lg"
+        message="Cargando componente..."
+      ></ui-loading>`;
+    }
+
+    console.log(
+      '[SchoolApp] About to render component:',
+      this.currentRouteComponent
+    );
+
     switch (this.currentRouteComponent) {
       case 'login-view':
+        console.log('[SchoolApp] Rendering login-view');
         return html`<login-view
           @login-success=${this.handleLoginSuccess}
         ></login-view>`;
@@ -712,16 +741,27 @@ export class SchoolApp extends LitElement {
         console.log('[SchoolApp] Rendering news-view');
         return html`<news-view></news-view>`;
       case 'notices-view':
+        console.log('[SchoolApp] Rendering notices-view');
+        console.log('[SchoolApp] Auth state:', {
+          isAuthenticated: this.authState.isAuthenticated,
+          user: this.authState.user,
+          isLoading: this.authState.isLoading,
+        });
         return html`<notices-view></notices-view>`;
       case 'calendar-view':
+        console.log('[SchoolApp] Rendering calendar-view');
         return html`<calendar-view></calendar-view>`;
       case 'users-view':
+        console.log('[SchoolApp] Rendering users-view');
         return html`<users-view></users-view>`;
       case 'settings-view':
+        console.log('[SchoolApp] Rendering settings-view');
         return html`<settings-view></settings-view>`;
       case 'profile-view':
+        console.log('[SchoolApp] Rendering profile-view');
         return html`<profile-view></profile-view>`;
       default:
+        console.log('[SchoolApp] Unknown component, defaulting to news-view');
         return html`<news-view></news-view>`;
     }
   }

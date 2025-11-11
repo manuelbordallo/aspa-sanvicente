@@ -596,11 +596,15 @@ export class CalendarView extends LitElement {
       const year = this._currentDate.getFullYear();
       const month = this._currentDate.getMonth() + 1;
       this._events = await calendarService.getEventsForMonth(year, month);
+      // Force update to ensure re-render
+      this.requestUpdate();
     } catch (error) {
       console.error('Error loading events:', error);
       // TODO: Show error notification
     } finally {
       this._loading = false;
+      // Force update after loading state changes
+      this.requestUpdate();
     }
   }
 
