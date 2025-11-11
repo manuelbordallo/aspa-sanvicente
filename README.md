@@ -1,179 +1,146 @@
-# Aplicación de Gestión Escolar
+# ASPA San Vicente - Monorepo
 
-Una aplicación web moderna para la gestión de comunicaciones escolares, construida con Lit/Catalyst y Tailwind CSS.
+Sistema de gestión escolar para ASPA San Vicente, organizado como monorepo con frontend y backend.
 
-## Tecnologías
-
-- **Frontend Framework**: Lit/Catalyst (Web Components)
-- **CSS Framework**: Tailwind CSS
-- **Build Tool**: Vite
-- **Language**: TypeScript
-- **Testing**: Web Test Runner + Playwright
-- **Linting**: ESLint
-- **Formatting**: Prettier
-
-## Estructura del Proyecto
+## 📁 Estructura del Proyecto
 
 ```
-src/
-├── components/           # Componentes reutilizables
-│   ├── ui/              # Componentes básicos de UI
-│   ├── forms/           # Componentes de formularios
-│   └── layout/          # Componentes de layout
-├── views/               # Vistas principales
-├── services/            # Servicios y lógica de negocio
-├── types/               # Definiciones de TypeScript
-├── utils/               # Utilidades
-└── styles/              # Estilos globales y Tailwind
+aspa-sanvicente/
+├── apps/
+│   ├── frontend/          # Aplicación web (Lit + TypeScript + Vite)
+│   └── backend/           # API REST (Express + TypeScript + Prisma)
+├── .kiro/                 # Especificaciones y configuración de Kiro
+├── .git/                  # Control de versiones
+└── README.md              # Este archivo
 ```
 
-## Scripts Disponibles
+## 🚀 Inicio Rápido
+
+### Prerrequisitos
+
+- Node.js 18 o superior
+- PostgreSQL 14 o superior
+- npm o yarn
+
+### Instalación
+
+1. **Clonar el repositorio**
+```bash
+git clone <repository-url>
+cd aspa-sanvicente
+```
+
+2. **Instalar dependencias del frontend**
+```bash
+cd apps/frontend
+npm install
+```
+
+3. **Instalar dependencias del backend**
+```bash
+cd apps/backend
+npm install
+```
+
+4. **Configurar variables de entorno**
+```bash
+# Frontend
+cd apps/frontend
+cp .env.example .env
+
+# Backend
+cd apps/backend
+cp .env.example .env
+# Editar .env con tu configuración de base de datos
+```
+
+5. **Configurar la base de datos**
+```bash
+cd apps/backend
+npm run prisma:migrate
+npm run prisma:generate
+```
 
 ### Desarrollo
 
-- `npm run dev` - Inicia el servidor de desarrollo
-- `npm run preview` - Previsualiza la build de producción
-
-### Build
-
-- `npm run build` - Construye la aplicación para producción
-- `npm run build:prod` - Build optimizado para producción
-- `npm run build:clean` - Limpia el directorio dist
-- `npm run build:analyze` - Analiza el tamaño del bundle
-
-### Calidad de Código
-
-- `npm run lint` - Ejecuta ESLint
-- `npm run lint:fix` - Ejecuta ESLint y corrige errores automáticamente
-- `npm run format` - Formatea el código con Prettier
-- `npm run format:check` - Verifica el formato del código
-- `npm run validate` - Ejecuta lint, format, test y build
-
-### Testing
-
-- `npm run test` - Ejecuta los tests con cobertura
-- `npm run test:watch` - Ejecuta los tests en modo watch
-- `npm run test:ci` - Ejecuta tests para CI/CD
-
-### Deployment
-
-- `npm run deploy` - Despliega automáticamente a GitHub
-- `npm run deploy:msg "mensaje"` - Despliega con mensaje personalizado
-
-## Desarrollo
-
-1. Instalar dependencias:
-
-   ```bash
-   npm install
-   ```
-
-2. Iniciar el servidor de desarrollo:
-
-   ```bash
-   npm run dev
-   ```
-
-3. Abrir [http://localhost:3000](http://localhost:3000) en el navegador
-
-### Desarrollo sin Backend
-
-La aplicación incluye un **modo mock** que permite desarrollar sin necesidad de un backend activo.
-
-### Inicio Rápido en Modo Mock
-
+**Frontend** (puerto 5173):
 ```bash
-# 1. Verifica que .env.development tenga:
-# VITE_ENABLE_MOCK_MODE=true
-
-# 2. Inicia el servidor
+cd apps/frontend
 npm run dev
-
-# 3. Abre http://localhost:3000
-# Verás un banner amarillo con las credenciales de prueba
 ```
 
-**Credenciales de prueba:**
+**Backend** (puerto 3000):
+```bash
+cd apps/backend
+npm run dev
+```
 
-- Admin: `admin@example.com` / `admin123`
-- Usuario: `user@example.com` / `user123`
+> **Tip**: Puedes ejecutar ambos desde la raíz con `npm run dev:frontend` y `npm run dev:backend`
 
-**Nota**: Si ves una pantalla en blanco, reinicia el servidor de desarrollo (Ctrl+C y luego `npm run dev`).
+## 📦 Aplicaciones
 
-Ver [DEVELOPMENT.md](./DEVELOPMENT.md) para más detalles sobre desarrollo sin backend y troubleshooting.
+### Frontend
+- **Tecnologías**: Lit, TypeScript, Vite, TailwindCSS
+- **Puerto**: 5173 (Vite default)
+- **Documentación**: [apps/frontend/README.md](apps/frontend/README.md)
 
-## Build y Despliegue
+### Backend
+- **Tecnologías**: Express, TypeScript, Prisma, PostgreSQL
+- **Puerto**: 3000 (configurable)
+- **Documentación**: [apps/backend/README.md](apps/backend/README.md)
 
-### Variables de Entorno
-
-1. Copiar el archivo de ejemplo:
-
-   ```bash
-   cp .env.example .env
-   ```
-
-2. Configurar las variables necesarias:
-   ```bash
-   VITE_API_BASE_URL=https://your-api.com/api
-   ```
-
-### Build para Producción
+## 🧪 Testing
 
 ```bash
-# Build optimizado
-npm run build:prod
+# Frontend
+cd apps/frontend
+npm test
 
-# Previsualizar build
-npm run preview
+# Backend
+cd apps/backend
+npm test
 ```
 
-### Despliegue
-
-#### GitHub Pages (Automático)
-
-- Push a la rama `main`
-- GitHub Actions construye y despliega automáticamente
-- Acceso en: `https://username.github.io/repository`
-
-#### Script de Despliegue
+## 🏗️ Build
 
 ```bash
-# Despliegue básico
-npm run deploy
+# Frontend
+cd apps/frontend
+npm run build
 
-# Despliegue con mensaje personalizado
-npm run deploy:msg "Descripción de los cambios"
+# Backend
+cd apps/backend
+npm run build
 ```
 
-#### Docker
+## 📝 Scripts Útiles
 
-```bash
-# Construir y ejecutar
-docker-compose up -d
+### Frontend
+- `npm run dev` - Servidor de desarrollo
+- `npm run build` - Build de producción
+- `npm test` - Ejecutar tests
+- `npm run lint` - Linter
+- `npm run format` - Formatear código
 
-# Acceder en http://localhost:8080
-```
+### Backend
+- `npm run dev` - Servidor de desarrollo con hot reload
+- `npm run build` - Compilar TypeScript
+- `npm start` - Iniciar servidor de producción
+- `npm test` - Ejecutar tests
+- `npm run prisma:studio` - Abrir Prisma Studio
 
-#### Otras Plataformas
+## 📚 Documentación Adicional
 
-- **Netlify**: Build `npm run build:prod`, Publish `dist`
-- **Vercel**: Framework Vite, Build `npm run build:prod`, Output `dist`
-- **Servidor tradicional**: Subir contenido de `dist/` y configurar SPA routing
+- [🚀 Quick Start](./QUICK_START.md) - Guía rápida de inicio
+- [📖 Guía del Monorepo](./MONOREPO.md) - Cómo trabajar con el monorepo
+- [🔄 Refactorización](./REFACTORING.md) - Detalles de la reorganización del proyecto
 
-Ver documentación detallada:
+## 🤝 Contribución
 
-- [DEVELOPMENT.md](./DEVELOPMENT.md) - Guía de desarrollo sin backend y troubleshooting
-- [BUILD.md](./BUILD.md) - Guía completa de build y optimización
-- [DEPLOYMENT.md](./DEPLOYMENT.md) - Instrucciones detalladas de despliegue
-- [QUICK_DEPLOY.md](./QUICK_DEPLOY.md) - Guía rápida de despliegue
+1. Crear una rama desde `main`
+2. Hacer cambios y commits
+3. Crear Pull Request
 
-## Testing
+## 📄 Licencia
 
-Los tests se ejecutan con Web Test Runner y Playwright. Los archivos de test deben tener la extensión `.test.ts` y estar ubicados junto a los componentes que testean.
-
-## Configuración
-
-- **Tailwind CSS**: Configurado con colores personalizados y utilidades adicionales
-- **TypeScript**: Configurado con strict mode y decoradores experimentales para Lit
-- **ESLint**: Configurado con reglas recomendadas para TypeScript
-- **Prettier**: Configurado con formato estándar
+MIT
