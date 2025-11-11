@@ -1,0 +1,112 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+model User {
+  id            String   @id @default(uuid())
+  firstName     String
+  lastName      String
+  email         String   @unique
+  password      String
+  role          Role     @default(USER)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  // Relations
+  newsCreated       News[]
+  noticesSent       Notice[]  @relation("NoticeAuthor")
+  noticesReceived   Notice[]  @relation("NoticeRecipient")
+  eventsCreated     CalendarEvent[]
+  groupMemberships  UserGroupMember[]
+  passwordResets    PasswordResetToken[]
+}
+
+model News {
+  id        String   @id @default(uuid())
+  title     String
+  content   String   @db.Text
+  summary   String
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@index([authorId])
+  @@index([createdAt])
+}
+
+model Notice {
+  id          String   @id @default(uuid())
+  content     String   @db.Text
+  authorId    String
+  author      User     @relation("NoticeAuthor", fields: [authorId], references: [id])
+  recipientId String
+  recipient   User     @relation("NoticeRecipient", fields: [recipientId], references: [id])
+  isRead      Boolean  @default(false)
+  readAt      DateTime?
+  createdAt   DateTime @default(now())
+  
+  @@index([recipientId, isRead])
+  @@index([authorId])
+  @@index([createdAt])
+}
+
+model CalendarEvent {
+  id          String   @id @default(uuid())
+  title       String
+  description String   @db.Text
+  date        DateTime
+  authorId    String
+  author      User     @relation(fields: [authorId], references: [id])
+  createdAt   DateTime @default(now())
+  
+  @@index([date])
+  @@index([authorId])
+}
+
+model UserGroup {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  members   UserGroupMember[]
+}
+
+model UserGroupMember {
+  groupId String
+  group   UserGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  userId  String
+  user    User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  addedAt DateTime  @default(now())
+  
+  @@id([groupId, userId])
+  @@index([userId])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  
+  @@index([token])
+  @@index([userId])
+}

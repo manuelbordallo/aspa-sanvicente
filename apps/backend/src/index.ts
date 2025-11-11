@@ -1,2 +1,5 @@
-// Placeholder file - will be replaced during implementation
-export const placeholder = 'Backend API';
+import createApp from './app';
+
+const app = createApp();
+
+export default app;

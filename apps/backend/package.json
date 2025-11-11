@@ -14,10 +14,16 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
     "prisma:seed": "ts-node prisma/seed.ts",
+    "seed": "ts-node prisma/seed.ts",
     "lint": "eslint src --ext .ts",
     "format": "prettier --write \"src/**/*.ts\""
   },
-  "keywords": ["api", "rest", "school", "management"],
+  "keywords": [
+    "api",
+    "rest",
+    "school",
+    "management"
+  ],
   "author": "",
   "license": "MIT",
   "dependencies": {
@@ -29,6 +35,8 @@
     "helmet": "^7.1.0",
     "jsonwebtoken": "^9.0.2",
     "nodemailer": "^6.9.7",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
     "zod": "^3.22.4"
   },
   "devDependencies": {
@@ -40,6 +48,8 @@
     "@types/node": "^20.10.6",
     "@types/nodemailer": "^6.4.14",
     "@types/supertest": "^6.0.2",
+    "@types/swagger-jsdoc": "^6.0.4",
+    "@types/swagger-ui-express": "^4.1.8",
     "@typescript-eslint/eslint-plugin": "^6.17.0",
     "@typescript-eslint/parser": "^6.17.0",
     "eslint": "^8.56.0",
