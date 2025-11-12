@@ -92,6 +92,7 @@ export class MockAuthService {
    * Add listener for auth state changes
    */
   addAuthStateListener(listener: (state: AuthState) => void): void {
+    console.log('[MockAuthService] Adding auth state listener, total listeners:', this.authStateListeners.length + 1);
     this.authStateListeners.push(listener);
   }
 

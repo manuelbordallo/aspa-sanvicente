@@ -1,7 +1,7 @@
-import { User } from '@prisma/client';
 import userRepository, { CreateUserData, UpdateUserData, UserFilters } from '../repositories/user.repository';
 import { hashPassword, validatePasswordStrength } from '../utils/password.util';
 import { PaginationParams, PaginationResult } from '../utils/pagination.util';
+import { normalizeUser, normalizeUsers, NormalizedUser } from '../utils/user.util';
 
 class UserService {
   /**
@@ -10,14 +10,14 @@ class UserService {
   async getUsers(
     pagination: PaginationParams,
     filters?: UserFilters
-  ): Promise<PaginationResult<Omit<User, 'password'>>> {
+  ): Promise<PaginationResult<NormalizedUser>> {
     const { users, total } = await userRepository.findAll(pagination, filters);
 
-    // Remove passwords from user objects
-    const usersWithoutPasswords = users.map(({ password, ...user }) => user);
+    // Normalize users (remove passwords and normalize roles)
+    const normalizedUsers = normalizeUsers(users);
 
     return {
-      data: usersWithoutPasswords,
+      data: normalizedUsers,
       total,
       page: pagination.page,
       limit: pagination.limit,
@@ -30,23 +30,21 @@ class UserService {
   /**
    * Get user by ID
    */
-  async getUserById(id: string): Promise<Omit<User, 'password'>> {
+  async getUserById(id: string): Promise<NormalizedUser> {
     const user = await userRepository.findById(id);
 
     if (!user) {
       throw new Error('User not found');
     }
 
-    // Remove password from user object
-    const { password, ...userWithoutPassword } = user;
-
-    return userWithoutPassword;
+    // Normalize user (remove password and normalize role)
+    return normalizeUser(user);
   }
 
   /**
    * Create new user with email uniqueness check and password hashing
    */
-  async createUser(data: CreateUserData): Promise<Omit<User, 'password'>> {
+  async createUser(data: CreateUserData): Promise<NormalizedUser> {
     // Check email uniqueness
     const existingUser = await userRepository.findByEmail(data.email);
 
@@ -68,16 +66,14 @@ class UserService {
       password: hashedPassword,
     });
 
-    // Remove password from user object
-    const { password, ...userWithoutPassword } = user;
-
-    return userWithoutPassword;
+    // Normalize user (remove password and normalize role)
+    return normalizeUser(user);
   }
 
   /**
    * Update user with validation
    */
-  async updateUser(id: string, data: UpdateUserData): Promise<Omit<User, 'password'>> {
+  async updateUser(id: string, data: UpdateUserData): Promise<NormalizedUser> {
     // Check if user exists
     const existingUser = await userRepository.findById(id);
 
@@ -104,16 +100,14 @@ class UserService {
     // Update user
     const user = await userRepository.update(id, data);
 
-    // Remove password from user object
-    const { password, ...userWithoutPassword } = user;
-
-    return userWithoutPassword;
+    // Normalize user (remove password and normalize role)
+    return normalizeUser(user);
   }
 
   /**
    * Deactivate user (soft delete)
    */
-  async deactivateUser(id: string): Promise<Omit<User, 'password'>> {
+  async deactivateUser(id: string): Promise<NormalizedUser> {
     // Check if user exists
     const existingUser = await userRepository.findById(id);
 
@@ -124,10 +118,8 @@ class UserService {
     // Deactivate user
     const user = await userRepository.deactivate(id);
 
-    // Remove password from user object
-    const { password, ...userWithoutPassword } = user;
-
-    return userWithoutPassword;
+    // Normalize user (remove password and normalize role)
+    return normalizeUser(user);
   }
 }
 

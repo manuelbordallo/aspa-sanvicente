@@ -19,13 +19,13 @@ describe('Auth Integration Tests', () => {
     adminUser = users.adminUser;
     regularUser = users.regularUser;
     testPassword = users.password;
-    
+
     adminToken = generateToken({
       userId: adminUser.id,
       email: adminUser.email,
       role: adminUser.role,
     });
-    
+
     userToken = generateToken({
       userId: regularUser.id,
       email: regularUser.email,
@@ -53,6 +53,36 @@ describe('Auth Integration Tests', () => {
       expect(response.body.data).toHaveProperty('user');
       expect(response.body.data.user.email).toBe('admin@test.com');
       expect(response.body.data.user).not.toHaveProperty('password');
+      // Verify role is normalized to lowercase
+      expect(response.body.data.user.role).toBe('admin');
+      expect(typeof response.body.data.user.role).toBe('string');
+      // Verify role is NOT uppercase (from Prisma)
+      expect(response.body.data.user.role).not.toBe('ADMIN');
+    });
+
+    it('should login regular user with lowercase role', async () => {
+      const response = await request(app)
+        .post('/api/auth/login')
+        .send({
+          email: 'user@test.com',
+          password: testPassword,
+        });
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data.user.email).toBe('user@test.com');
+      // Verify role is normalized to lowercase 'user'
+      expect(response.body.data.user.role).toBe('user');
+      expect(response.body.data.user).not.toHaveProperty('password');
+      // Verify role is NOT uppercase (from Prisma)
+      expect(response.body.data.user.role).not.toBe('USER');
+      // Verify normalized user format
+      expect(response.body.data.user).toHaveProperty('id');
+      expect(response.body.data.user).toHaveProperty('firstName');
+      expect(response.body.data.user).toHaveProperty('lastName');
+      expect(response.body.data.user).toHaveProperty('email');
+      expect(response.body.data.user).toHaveProperty('role');
+      expect(response.body.data.user).toHaveProperty('isActive');
     });
 
     it('should return 401 for invalid email', async () => {
@@ -92,7 +122,7 @@ describe('Auth Integration Tests', () => {
   });
 
   describe('GET /api/auth/validate', () => {
-    it('should validate valid token and return user data', async () => {
+    it('should validate valid token and return user data with normalized role', async () => {
       const response = await request(app)
         .get('/api/auth/validate')
         .set('Authorization', `Bearer ${adminToken}`);
@@ -100,6 +130,36 @@ describe('Auth Integration Tests', () => {
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
       expect(response.body.data.user.email).toBe('admin@test.com');
+      // Verify role is normalized to lowercase
+      expect(response.body.data.user.role).toBe('admin');
+      expect(typeof response.body.data.user.role).toBe('string');
+      // Verify role is NOT uppercase (from Prisma)
+      expect(response.body.data.user.role).not.toBe('ADMIN');
+      // Verify password is not included
+      expect(response.body.data.user).not.toHaveProperty('password');
+      // Verify normalized user format
+      expect(response.body.data.user).toHaveProperty('id');
+      expect(response.body.data.user).toHaveProperty('firstName');
+      expect(response.body.data.user).toHaveProperty('lastName');
+      expect(response.body.data.user).toHaveProperty('email');
+      expect(response.body.data.user).toHaveProperty('role');
+      expect(response.body.data.user).toHaveProperty('isActive');
+    });
+
+    it('should validate regular user token with lowercase role', async () => {
+      const response = await request(app)
+        .get('/api/auth/validate')
+        .set('Authorization', `Bearer ${userToken}`);
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data.user.email).toBe('user@test.com');
+      // Verify role is normalized to lowercase 'user'
+      expect(response.body.data.user.role).toBe('user');
+      // Verify role is NOT uppercase (from Prisma)
+      expect(response.body.data.user.role).not.toBe('USER');
+      // Verify password is not included
+      expect(response.body.data.user).not.toHaveProperty('password');
     });
 
     it('should return 401 for missing token', async () => {

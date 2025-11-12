@@ -46,8 +46,8 @@ export class CalendarService {
 
     const queryString = params.toString();
     const endpoint = queryString
-      ? `/calendar/events?${queryString}`
-      : '/calendar/events';
+      ? `/api/calendar/events?${queryString}`
+      : '/api/calendar/events';
 
     const response: ApiResponse<PaginatedResponse<CalendarEvent>> =
       await apiClient.get(endpoint);
@@ -128,7 +128,7 @@ export class CalendarService {
    */
   async getEventById(id: string): Promise<CalendarEvent> {
     const response: ApiResponse<CalendarEvent> = await apiClient.get(
-      `/calendar/events/${id}`
+      `/api/calendar/events/${id}`
     );
 
     if (!response.success || !response.data) {
@@ -153,7 +153,7 @@ export class CalendarService {
    */
   async createEvent(eventData: EventFormData): Promise<CalendarEvent> {
     const response: ApiResponse<CalendarEvent> = await apiClient.post(
-      '/calendar/events',
+      '/api/calendar/events',
       {
         ...eventData,
         date: eventData.date.toISOString(),
@@ -190,7 +190,7 @@ export class CalendarService {
     };
 
     const response: ApiResponse<CalendarEvent> = await apiClient.put(
-      `/calendar/events/${id}`,
+      `/api/calendar/events/${id}`,
       updateData
     );
 
@@ -216,7 +216,7 @@ export class CalendarService {
    */
   async deleteEvent(id: string): Promise<void> {
     const response: ApiResponse<void> = await apiClient.delete(
-      `/calendar/events/${id}`
+      `/api/calendar/events/${id}`
     );
 
     if (!response.success) {

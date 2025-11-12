@@ -1,18 +1,18 @@
-import { User } from '@prisma/client';
 import userRepository from '../repositories/user.repository';
 import passwordResetRepository from '../repositories/password-reset.repository';
 import { comparePassword, hashPassword, validatePasswordStrength } from '../utils/password.util';
 import { generateToken, generateRefreshToken, verifyToken, JWTPayload } from '../utils/jwt.util';
+import { normalizeUser, NormalizedUser } from '../utils/user.util';
 import { randomUUID } from 'crypto';
 
 export interface LoginResult {
-  user: Omit<User, 'password'>;
+  user: NormalizedUser;
   token: string;
   refreshToken: string;
 }
 
 export interface ValidateTokenResult {
-  user: Omit<User, 'password'>;
+  user: NormalizedUser;
 }
 
 class AuthService {
@@ -23,7 +23,7 @@ class AuthService {
   async login(email: string, password: string): Promise<LoginResult> {
     // Find user by email
     const user = await userRepository.findByEmail(email);
-    
+
     if (!user) {
       throw new Error('Invalid credentials');
     }
@@ -35,7 +35,7 @@ class AuthService {
 
     // Verify password
     const isPasswordValid = await comparePassword(password, user.password);
-    
+
     if (!isPasswordValid) {
       throw new Error('Invalid credentials');
     }
@@ -50,11 +50,8 @@ class AuthService {
     const token = generateToken(payload);
     const refreshToken = generateRefreshToken(payload);
 
-    // Remove password from user object
-    const { password: _, ...userWithoutPassword } = user;
-
     return {
-      user: userWithoutPassword,
+      user: normalizeUser(user),
       token,
       refreshToken,
     };
@@ -78,11 +75,8 @@ class AuthService {
       throw new Error('Account is deactivated');
     }
 
-    // Remove password from user object
-    const { password: _, ...userWithoutPassword } = user;
-
     return {
-      user: userWithoutPassword,
+      user: normalizeUser(user),
     };
   }
 

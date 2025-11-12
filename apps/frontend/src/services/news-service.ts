@@ -45,17 +45,17 @@ export class NewsService {
       params.append('endDate', filters.endDate.toISOString());
 
     const queryString = params.toString();
-    const endpoint = queryString ? `/news?${queryString}` : '/news';
+    const endpoint = queryString ? `/api/news?${queryString}` : '/api/news';
 
-    const response: ApiResponse<PaginatedResponse<News>> =
-      await apiClient.get(endpoint);
+    const response: any = await apiClient.get(endpoint);
 
     if (!response.success || !response.data) {
       throw new Error(response.message || 'Error al obtener las noticias');
     }
 
-    // Convert date strings to Date objects
-    response.data.data = response.data.data.map((news) => ({
+    // Backend returns: { success, data: T[], pagination }
+    // Convert to frontend format: { data: T[], total, page, ... }
+    const newsItems = response.data.map((news: any) => ({
       ...news,
       createdAt: new Date(news.createdAt),
       updatedAt: new Date(news.updatedAt),
@@ -66,14 +66,22 @@ export class NewsService {
       },
     }));
 
-    return response.data;
+    return {
+      data: newsItems,
+      total: response.pagination.total,
+      page: response.pagination.page,
+      limit: response.pagination.limit,
+      totalPages: response.pagination.totalPages,
+      hasNext: response.pagination.hasNext,
+      hasPrev: response.pagination.hasPrev,
+    };
   }
 
   /**
    * Get a single news item by ID
    */
   async getNewsById(id: string): Promise<News> {
-    const response: ApiResponse<News> = await apiClient.get(`/news/${id}`);
+    const response: ApiResponse<News> = await apiClient.get(`/api/news/${id}`);
 
     if (!response.success || !response.data) {
       throw new Error(response.message || 'Noticia no encontrada');
@@ -96,7 +104,7 @@ export class NewsService {
    * Create a new news item (admin only)
    */
   async createNews(newsData: NewsFormData): Promise<News> {
-    const response: ApiResponse<News> = await apiClient.post('/news', newsData);
+    const response: ApiResponse<News> = await apiClient.post('/api/news', newsData);
 
     if (!response.success || !response.data) {
       throw new Error(response.message || 'Error al crear la noticia');
@@ -120,7 +128,7 @@ export class NewsService {
    */
   async updateNews(id: string, newsData: Partial<NewsFormData>): Promise<News> {
     const response: ApiResponse<News> = await apiClient.put(
-      `/news/${id}`,
+      `/api/news/${id}`,
       newsData
     );
 
@@ -145,7 +153,7 @@ export class NewsService {
    * Delete a news item (admin only)
    */
   async deleteNews(id: string): Promise<void> {
-    const response: ApiResponse<void> = await apiClient.delete(`/news/${id}`);
+    const response: ApiResponse<void> = await apiClient.delete(`/api/news/${id}`);
 
     if (!response.success) {
       throw new Error(response.message || 'Error al eliminar la noticia');

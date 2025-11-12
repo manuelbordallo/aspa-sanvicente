@@ -333,12 +333,10 @@ export class SchoolApp extends LitElement {
 
   async connectedCallback() {
     super.connectedCallback();
+    console.log('[SchoolApp] connectedCallback called');
 
     // Initialize theme
     this.initializeTheme();
-
-    // Setup auth listener
-    this.setupAuthListener();
 
     // Setup resize observer for mobile detection
     this.setupResizeObserver();
@@ -357,6 +355,10 @@ export class SchoolApp extends LitElement {
 
     // Detect backend availability and initialize auth service
     await this.initializeBackendDetection();
+
+    // Setup auth listener AFTER backend detection
+    // This ensures we register with the correct service (real or mock)
+    this.setupAuthListener();
 
     // Validate authentication
     await this.validateAuth();
@@ -388,7 +390,8 @@ export class SchoolApp extends LitElement {
   }
 
   private setupAuthListener(): void {
-    authService.addAuthStateListener(this.handleAuthStateChange.bind(this));
+    console.log('[SchoolApp] Setting up auth listener');
+    authService.addAuthStateListener(this.handleAuthStateChange);
   }
 
   private setupRouteGuardsListener(): void {
@@ -552,12 +555,24 @@ export class SchoolApp extends LitElement {
     }
   }
 
-  private handleLoginSuccess(): void {
+  private handleLoginSuccess = (): void => {
+    console.log('[SchoolApp] handleLoginSuccess called');
     // Navigate to home after successful login
-    this.router.navigate('/');
-  }
+    // Use setTimeout to ensure auth state is fully updated
+    setTimeout(() => {
+      console.log('[SchoolApp] Navigating to /');
+      this.router.navigate('/');
+    }, 100);
+  };
 
   private handleAuthStateChange = (authState: AuthState): void => {
+    console.log('[SchoolApp] handleAuthStateChange called:', {
+      isAuthenticated: authState.isAuthenticated,
+      isLoading: authState.isLoading,
+      currentPath: window.location.pathname,
+      user: authState.user?.email
+    });
+
     this.authState = {
       user: authState.user,
       isAuthenticated: authState.isAuthenticated,
@@ -568,13 +583,21 @@ export class SchoolApp extends LitElement {
     // Redirect to login if not authenticated and not already on login page
     if (!authState.isAuthenticated && !authState.isLoading) {
       if (window.location.pathname !== '/login') {
+        console.log('[SchoolApp] Not authenticated, navigating to login');
         this.navigateToLogin();
       }
     }
 
     // Redirect to home if authenticated and on login page
-    if (authState.isAuthenticated && window.location.pathname === '/login') {
-      this.router.navigate('/');
+    const isOnLoginPage = window.location.pathname === '/login' ||
+      this.currentRouteComponent === 'login-view' ||
+      this.appState.currentView === 'login';
+
+    if (authState.isAuthenticated && isOnLoginPage) {
+      console.log('[SchoolApp] Authenticated on login page, navigating to home');
+      setTimeout(() => {
+        this.router.navigate('/');
+      }, 100);
     }
   };
 
@@ -828,7 +851,7 @@ export class SchoolApp extends LitElement {
         <div class="error-title">${errorTitle}</div>
         <div class="error-message">${errorMessage}</div>
         ${this.mockMode
-          ? html`
+        ? html`
               <div class="error-message" style="margin-top: 1rem;">
                 <strong>Modo de desarrollo activo:</strong> Puedes continuar
                 usando la aplicación con datos de prueba.
@@ -840,7 +863,7 @@ export class SchoolApp extends LitElement {
                 Ir al Login
               </button>
             `
-          : html`
+        : html`
               <button
                 class="retry-button"
                 @click=${() => this.retryConnection()}

@@ -43,7 +43,7 @@ export class UserService {
       params.append('isActive', filters.isActive.toString());
 
     const queryString = params.toString();
-    const endpoint = queryString ? `/users?${queryString}` : '/users';
+    const endpoint = queryString ? `/api/users?${queryString}` : '/api/users';
 
     const response: ApiResponse<PaginatedResponse<User>> =
       await apiClient.get(endpoint);
@@ -66,7 +66,7 @@ export class UserService {
    * Get a single user by ID
    */
   async getUserById(id: string): Promise<User> {
-    const response: ApiResponse<User> = await apiClient.get(`/users/${id}`);
+    const response: ApiResponse<User> = await apiClient.get(`/api/users/${id}`);
 
     if (!response.success || !response.data) {
       throw new Error(response.message || 'Usuario no encontrado');
@@ -85,7 +85,7 @@ export class UserService {
    */
   async createUser(userData: UserFormData): Promise<User> {
     const response: ApiResponse<User> = await apiClient.post(
-      '/users',
+      '/api/users',
       userData
     );
 
@@ -106,7 +106,7 @@ export class UserService {
    */
   async updateUser(id: string, userData: Partial<UserFormData>): Promise<User> {
     const response: ApiResponse<User> = await apiClient.put(
-      `/users/${id}`,
+      `/api/users/${id}`,
       userData
     );
 
@@ -126,7 +126,7 @@ export class UserService {
    * Delete a user (admin only)
    */
   async deleteUser(id: string): Promise<void> {
-    const response: ApiResponse<void> = await apiClient.delete(`/users/${id}`);
+    const response: ApiResponse<void> = await apiClient.delete(`/api/users/${id}`);
 
     if (!response.success) {
       throw new Error(response.message || 'Error al eliminar el usuario');
@@ -235,7 +235,7 @@ export class UserService {
       active: number;
       inactive: number;
       recentRegistrations: number;
-    }> = await apiClient.get('/users/stats');
+    }> = await apiClient.get('/api/users/stats');
 
     if (!response.success || !response.data) {
       throw new Error(
@@ -269,7 +269,7 @@ export class UserService {
    */
   async sendPasswordResetEmail(id: string): Promise<void> {
     const response: ApiResponse<void> = await apiClient.post(
-      `/users/${id}/send-reset-email`
+      `/api/users/${id}/send-reset-email`
     );
 
     if (!response.success) {
@@ -287,7 +287,7 @@ export class UserService {
   > {
     const response: ApiResponse<
       Pick<User, 'id' | 'firstName' | 'lastName' | 'email'>[]
-    > = await apiClient.get('/users/for-notices');
+    > = await apiClient.get('/api/users/for-notices');
 
     if (!response.success || !response.data) {
       throw new Error(

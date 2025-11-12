@@ -69,6 +69,11 @@ export class ApiClient {
     this.addInterceptor({
       request: (requestConfig: RequestConfig) => {
         const token = localStorage.getItem(config.auth.tokenKey);
+        console.log('[ApiClient] Request interceptor:', {
+          hasToken: !!token,
+          tokenKey: config.auth.tokenKey,
+          tokenPreview: token ? token.substring(0, 20) + '...' : 'none'
+        });
         if (token) {
           requestConfig.headers = {
             ...requestConfig.headers,

@@ -72,7 +72,8 @@ export interface ApiError {
 export interface LoginResponse {
   token: string;
   user: User;
-  expiresAt: Date;
+  refreshToken?: string;
+  expiresAt?: Date;
 }
 
 export interface PaginatedResponse<T> {
@@ -80,6 +81,7 @@ export interface PaginatedResponse<T> {
   total: number;
   page: number;
   limit: number;
+  totalPages: number;
   hasNext: boolean;
   hasPrev: boolean;
 }

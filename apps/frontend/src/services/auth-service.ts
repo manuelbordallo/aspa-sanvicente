@@ -1,4 +1,5 @@
 import { apiClient } from './api-client.js';
+import { config } from '../config/index.js';
 import type {
   User,
   UserRole,
@@ -29,7 +30,7 @@ export class AuthService {
    * Initialize authentication state from localStorage
    */
   private initializeAuth(): void {
-    const token = localStorage.getItem('auth_token');
+    const token = localStorage.getItem(config.auth.tokenKey);
     const userStr = localStorage.getItem('auth_user');
 
     if (token && userStr) {
@@ -69,6 +70,7 @@ export class AuthService {
    * Add listener for auth state changes
    */
   addAuthStateListener(listener: (state: AuthState) => void): void {
+    console.log('[AuthService] Adding auth state listener, total listeners:', this.authStateListeners.length + 1);
     this.authStateListeners.push(listener);
   }
 
@@ -96,6 +98,13 @@ export class AuthService {
       error,
     };
 
+    console.log('[AuthService] Notifying auth state change:', {
+      isAuthenticated: state.isAuthenticated,
+      isLoading: state.isLoading,
+      user: state.user?.email,
+      listenersCount: this.authStateListeners.length
+    });
+
     this.authStateListeners.forEach((listener) => listener(state));
   }
 
@@ -107,7 +116,7 @@ export class AuthService {
 
     try {
       const response: ApiResponse<LoginResponse> = await apiClient.post(
-        '/auth/login',
+        '/api/auth/login',
         credentials
       );
 
@@ -115,12 +124,25 @@ export class AuthService {
         throw new Error(response.message || 'Error en el inicio de sesión');
       }
 
-      const { token, user, expiresAt } = response.data;
+      const { token, user, refreshToken } = response.data;
+
+      // Decode JWT to get expiration time
+      let expiresAt: number;
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        expiresAt = payload.exp * 1000; // Convert to milliseconds
+      } catch (error) {
+        // Fallback: 1 hour from now
+        expiresAt = Date.now() + 3600000;
+      }
 
       // Store auth data
-      localStorage.setItem('auth_token', token);
+      localStorage.setItem(config.auth.tokenKey, token);
       localStorage.setItem('auth_user', JSON.stringify(user));
       localStorage.setItem('auth_expires', expiresAt.toString());
+      if (refreshToken) {
+        localStorage.setItem('auth_refresh_token', refreshToken);
+      }
 
       this.currentUser = user;
       this.scheduleTokenRefresh();
@@ -142,7 +164,7 @@ export class AuthService {
     try {
       // Attempt to notify server of logout
       if (this.isAuthenticated()) {
-        await apiClient.post('/auth/logout');
+        await apiClient.post('/api/auth/logout');
       }
     } catch (error) {
       // Continue with logout even if server request fails
@@ -171,24 +193,25 @@ export class AuthService {
    * Clear authentication data from localStorage
    */
   private clearAuthData(): void {
-    localStorage.removeItem('auth_token');
+    localStorage.removeItem(config.auth.tokenKey);
     localStorage.removeItem('auth_user');
     localStorage.removeItem('auth_expires');
+    localStorage.removeItem('auth_refresh_token');
   }
 
   /**
    * Check if user is authenticated
    */
   isAuthenticated(): boolean {
-    const token = localStorage.getItem('auth_token');
+    const token = localStorage.getItem(config.auth.tokenKey);
     const expiresStr = localStorage.getItem('auth_expires');
 
     if (!token || !expiresStr) {
       return false;
     }
 
-    const expiresAt = new Date(expiresStr);
-    const now = new Date();
+    const expiresAt = parseInt(expiresStr, 10);
+    const now = Date.now();
 
     if (now >= expiresAt) {
       this.handleLogout();
@@ -237,7 +260,7 @@ export class AuthService {
     }
 
     try {
-      const response: ApiResponse<User> = await apiClient.get('/auth/validate');
+      const response: ApiResponse<User> = await apiClient.get('/api/auth/validate');
 
       if (response.success && response.data) {
         // Update user data if it changed
@@ -259,20 +282,35 @@ export class AuthService {
    * Refresh authentication token
    */
   async refreshToken(): Promise<boolean> {
-    if (!this.isAuthenticated()) {
+    const refreshToken = localStorage.getItem('auth_refresh_token');
+
+    if (!refreshToken) {
       return false;
     }
 
     try {
       const response: ApiResponse<LoginResponse> =
-        await apiClient.post('/auth/refresh');
+        await apiClient.post('/api/auth/refresh', { refreshToken });
 
       if (response.success && response.data) {
-        const { token, user, expiresAt } = response.data;
+        const { token, user, refreshToken: newRefreshToken } = response.data;
 
-        localStorage.setItem('auth_token', token);
+        // Decode JWT to get expiration time
+        let expiresAt: number;
+        try {
+          const payload = JSON.parse(atob(token.split('.')[1]));
+          expiresAt = payload.exp * 1000; // Convert to milliseconds
+        } catch (error) {
+          // Fallback: 1 hour from now
+          expiresAt = Date.now() + 3600000;
+        }
+
+        localStorage.setItem(config.auth.tokenKey, token);
         localStorage.setItem('auth_user', JSON.stringify(user));
         localStorage.setItem('auth_expires', expiresAt.toString());
+        if (newRefreshToken) {
+          localStorage.setItem('auth_refresh_token', newRefreshToken);
+        }
 
         this.currentUser = user;
         this.scheduleTokenRefresh();
@@ -300,9 +338,9 @@ export class AuthService {
     const expiresStr = localStorage.getItem('auth_expires');
     if (!expiresStr) return;
 
-    const expiresAt = new Date(expiresStr);
-    const now = new Date();
-    const timeUntilExpiry = expiresAt.getTime() - now.getTime();
+    const expiresAt = parseInt(expiresStr, 10);
+    const now = Date.now();
+    const timeUntilExpiry = expiresAt - now;
 
     // Refresh token 5 minutes before expiry
     const refreshTime = Math.max(timeUntilExpiry - 5 * 60 * 1000, 60000);
@@ -321,7 +359,7 @@ export class AuthService {
     }
 
     const response: ApiResponse<void> = await apiClient.post(
-      '/auth/change-password',
+      '/api/auth/change-password',
       passwordData
     );
 
@@ -360,7 +398,7 @@ export class AuthService {
    */
   async requestPasswordReset(email: string): Promise<void> {
     const response: ApiResponse<void> = await apiClient.post(
-      '/auth/forgot-password',
+      '/api/auth/forgot-password',
       { email }
     );
 
@@ -376,7 +414,7 @@ export class AuthService {
    */
   async resetPassword(token: string, newPassword: string): Promise<void> {
     const response: ApiResponse<void> = await apiClient.post(
-      '/auth/reset-password',
+      '/api/auth/reset-password',
       {
         token,
         password: newPassword,

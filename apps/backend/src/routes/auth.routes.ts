@@ -30,8 +30,9 @@ router.post('/logout', authenticateToken, authController.logout);
  * POST /api/auth/refresh
  * Refresh JWT token
  * Requirements: 2.6
+ * Note: Does not require authenticateToken middleware as it uses refresh token
  */
-router.post('/refresh', authenticateToken, authController.refreshToken);
+router.post('/refresh', authController.refreshToken);
 
 /**
  * GET /api/auth/validate

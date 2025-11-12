@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Backend Connection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .result {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test Backend Connection</h1>
+    
+    <button onclick="testBackend()">Test Backend Connection</button>
+    
+    <div id="results"></div>
+
+    <script>
+        async function testBackend() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<p>Testing...</p>';
+            
+            const tests = [];
+            
+            // Test 1: Health endpoint
+            try {
+                const startTime = Date.now();
+                const response = await fetch('http://localhost:3000/health', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+                const responseTime = Date.now() - startTime;
+                const data = await response.json();
+                
+                tests.push({
+                    name: 'Health Endpoint',
+                    success: response.ok,
+                    status: response.status,
+                    responseTime: responseTime,
+                    data: data
+                });
+            } catch (error) {
+                tests.push({
+                    name: 'Health Endpoint',
+                    success: false,
+                    error: error.message
+                });
+            }
+            
+            // Test 2: API Health endpoint (wrong path)
+            try {
+                const startTime = Date.now();
+                const response = await fetch('http://localhost:3000/api/health', {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+                const responseTime = Date.now() - startTime;
+                const data = await response.json();
+                
+                tests.push({
+                    name: 'API Health Endpoint (should fail)',
+                    success: response.ok,
+                    status: response.status,
+                    responseTime: responseTime,
+                    data: data
+                });
+            } catch (error) {
+                tests.push({
+                    name: 'API Health Endpoint',
+                    success: false,
+                    error: error.message
+                });
+            }
+            
+            // Test 3: CORS preflight
+            try {
+                const startTime = Date.now();
+                const response = await fetch('http://localhost:3000/health', {
+                    method: 'OPTIONS',
+                    headers: {
+                        'Origin': 'http://localhost:5173',
+                        'Access-Control-Request-Method': 'GET',
+                        'Access-Control-Request-Headers': 'Content-Type',
+                    },
+                });
+                const responseTime = Date.now() - startTime;
+                
+                tests.push({
+                    name: 'CORS Preflight',
+                    success: response.ok,
+                    status: response.status,
+                    responseTime: responseTime,
+                    headers: {
+                        'Access-Control-Allow-Origin': response.headers.get('Access-Control-Allow-Origin'),
+                        'Access-Control-Allow-Methods': response.headers.get('Access-Control-Allow-Methods'),
+                        'Access-Control-Allow-Credentials': response.headers.get('Access-Control-Allow-Credentials'),
+                    }
+                });
+            } catch (error) {
+                tests.push({
+                    name: 'CORS Preflight',
+                    success: false,
+                    error: error.message
+                });
+            }
+            
+            // Display results
+            let html = '';
+            tests.forEach(test => {
+                const className = test.success ? 'success' : 'error';
+                html += `
+                    <div class="result ${className}">
+                        <h3>${test.name}</h3>
+                        ${test.success ? '✅ Success' : '❌ Failed'}
+                        ${test.status ? `<p>Status: ${test.status}</p>` : ''}
+                        ${test.responseTime ? `<p>Response Time: ${test.responseTime}ms</p>` : ''}
+                        ${test.error ? `<p>Error: ${test.error}</p>` : ''}
+                        ${test.data ? `<pre>${JSON.stringify(test.data, null, 2)}</pre>` : ''}
+                        ${test.headers ? `<pre>${JSON.stringify(test.headers, null, 2)}</pre>` : ''}
+                    </div>
+                `;
+            });
+            
+            resultsDiv.innerHTML = html;
+        }
+        
+        // Auto-run on load
+        window.addEventListener('load', testBackend);
+    </script>
+</body>
+</html>

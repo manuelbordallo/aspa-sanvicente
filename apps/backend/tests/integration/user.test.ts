@@ -17,16 +17,17 @@ describe('User Management Integration Tests', () => {
     adminUser = users.adminUser;
     regularUser = users.regularUser;
     
+    // Generate tokens with normalized (lowercase) roles
     adminToken = generateToken({
       userId: adminUser.id,
       email: adminUser.email,
-      role: adminUser.role,
+      role: adminUser.role.toLowerCase(),
     });
     
     userToken = generateToken({
       userId: regularUser.id,
       email: regularUser.email,
-      role: regularUser.role,
+      role: regularUser.role.toLowerCase(),
     });
   });
 
@@ -41,6 +42,11 @@ describe('User Management Integration Tests', () => {
       expect(response.body.data).toBeInstanceOf(Array);
       expect(response.body.pagination).toBeDefined();
       expect(response.body.pagination.total).toBeGreaterThanOrEqual(2);
+      
+      // Verify roles are normalized to lowercase
+      response.body.data.forEach((user: any) => {
+        expect(['user', 'admin']).toContain(user.role);
+      });
     });
 
     it('should support pagination parameters', async () => {
@@ -60,7 +66,8 @@ describe('User Management Integration Tests', () => {
         .set('Authorization', `Bearer ${adminToken}`);
 
       expect(response.status).toBe(200);
-      expect(response.body.data.every((u: any) => u.role === 'ADMIN')).toBe(true);
+      // Verify roles are normalized to lowercase
+      expect(response.body.data.every((u: any) => u.role === 'admin')).toBe(true);
     });
 
     it('should support sorting', async () => {
@@ -101,6 +108,9 @@ describe('User Management Integration Tests', () => {
       expect(response.body.data.id).toBe(regularUser.id);
       expect(response.body.data.email).toBe(regularUser.email);
       expect(response.body.data).not.toHaveProperty('password');
+      
+      // Verify role is normalized to lowercase
+      expect(['user', 'admin']).toContain(response.body.data.role);
     });
 
     it('should return 404 for non-existent user', async () => {
@@ -139,6 +149,9 @@ describe('User Management Integration Tests', () => {
       expect(response.body.success).toBe(true);
       expect(response.body.data.email).toBe('newuser@test.com');
       expect(response.body.data).not.toHaveProperty('password');
+      
+      // Verify role is normalized to lowercase
+      expect(response.body.data.role).toBe('user');
 
       // Verify user was created in database
       const user = await prisma.user.findUnique({
@@ -226,6 +239,9 @@ describe('User Management Integration Tests', () => {
       expect(response.body.success).toBe(true);
       expect(response.body.data.firstName).toBe('Updated');
       expect(response.body.data.lastName).toBe('User');
+      
+      // Verify role is normalized to lowercase
+      expect(['user', 'admin']).toContain(response.body.data.role);
     });
 
     it('should update user role', async () => {
@@ -248,7 +264,8 @@ describe('User Management Integration Tests', () => {
         });
 
       expect(response.status).toBe(200);
-      expect(response.body.data.role).toBe('ADMIN');
+      // Verify role is normalized to lowercase
+      expect(response.body.data.role).toBe('admin');
     });
 
     it('should return 404 for non-existent user', async () => {

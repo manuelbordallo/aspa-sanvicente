@@ -274,6 +274,7 @@ export class LoginView extends LitElement {
   }
 
   private redirectToApp() {
+    console.log('[LoginView] Dispatching login-success event');
     // Dispatch event to notify app of successful login
     this.dispatchEvent(
       new CustomEvent('login-success', {
@@ -281,6 +282,7 @@ export class LoginView extends LitElement {
         composed: true,
       })
     );
+    console.log('[LoginView] login-success event dispatched');
   }
 }
 

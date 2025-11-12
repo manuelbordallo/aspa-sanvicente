@@ -161,6 +161,13 @@ export const authServiceFactory = new AuthServiceFactory();
 export const authService = new Proxy({} as AuthServiceInstance, {
   get(_target, prop) {
     const service = authServiceFactory.getAuthServiceSync();
+
+    // Log when addAuthStateListener is accessed
+    if (prop === 'addAuthStateListener') {
+      console.log('[AuthServiceFactory] addAuthStateListener accessed, using:',
+        authServiceFactory.isMockMode() ? 'MockAuthService' : 'RealAuthService');
+    }
+
     const value = (service as any)[prop];
 
     // If it's a function, bind it to the service

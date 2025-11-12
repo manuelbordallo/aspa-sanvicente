@@ -99,27 +99,71 @@ export const routes: RouteConfig[] = [
 
 export class RouteGuard {
   static canActivate(route: RouteConfig): boolean {
+    const isAuth = authService.isAuthenticated();
+    const user = authService.getCurrentUser();
+    
+    console.log('[RouteGuard] canActivate - Starting authorization check:', {
+      route: route.name,
+      path: route.path,
+      requiresAuth: route.requiresAuth,
+      allowedRoles: route.allowedRoles,
+      isAuthenticated: isAuth,
+      hasToken: !!localStorage.getItem('auth_token'),
+      currentUser: user ? {
+        id: user.id,
+        email: user.email,
+        role: user.role,
+        roleType: typeof user.role
+      } : null
+    });
+    
     // Check authentication requirement
-    if (route.requiresAuth && !authService.isAuthenticated()) {
+    if (route.requiresAuth && !isAuth) {
+      console.log('[RouteGuard] ❌ Access denied - User not authenticated');
+      console.log('[RouteGuard] Redirect required: /login');
       return false;
     }
 
     // Check role permissions
     if (route.allowedRoles && route.allowedRoles.length > 0) {
-      const user = authService.getCurrentUser();
       if (!user) {
+        console.log('[RouteGuard] ❌ Access denied - No user object available despite authentication');
         return false;
       }
 
+      console.log('[RouteGuard] Checking role permissions:', {
+        userRole: user.role,
+        requiredRoles: route.allowedRoles,
+        isAdmin: user.role === 'admin'
+      });
+
       // Admin has access to all routes
       if (user.role === 'admin') {
+        console.log('[RouteGuard] ✅ Access granted - User is admin (has access to all routes)');
         return true;
       }
 
       // Check if user role is in allowed roles
-      return route.allowedRoles.includes(user.role);
+      const hasPermission = route.allowedRoles.includes(user.role);
+      
+      if (hasPermission) {
+        console.log('[RouteGuard] ✅ Access granted - User role matches allowed roles');
+      } else {
+        console.log('[RouteGuard] ❌ Access denied - User role not in allowed roles:', {
+          userRole: user.role,
+          allowedRoles: route.allowedRoles,
+          roleMatch: route.allowedRoles.map(r => ({
+            role: r,
+            matches: r === user.role,
+            comparison: `'${r}' === '${user.role}'`
+          }))
+        });
+      }
+      
+      return hasPermission;
     }
 
+    console.log('[RouteGuard] ✅ Access granted - No role restrictions on this route');
     return true;
   }
 

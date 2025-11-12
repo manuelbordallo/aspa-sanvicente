@@ -47,7 +47,7 @@ export class NoticeService {
       params.append('endDate', filters.endDate.toISOString());
 
     const queryString = params.toString();
-    const endpoint = queryString ? `/notices?${queryString}` : '/notices';
+    const endpoint = queryString ? `/api/notices?${queryString}` : '/api/notices';
 
     const response: ApiResponse<PaginatedResponse<Notice>> =
       await apiClient.get(endpoint);
@@ -88,7 +88,7 @@ export class NoticeService {
    */
   async getUnreadCount(): Promise<number> {
     const response: ApiResponse<{ count: number }> = await apiClient.get(
-      '/notices/unread-count'
+      '/api/notices/unread-count'
     );
 
     if (!response.success || !response.data) {
@@ -104,7 +104,7 @@ export class NoticeService {
    * Get a single notice by ID
    */
   async getNoticeById(id: string): Promise<Notice> {
-    const response: ApiResponse<Notice> = await apiClient.get(`/notices/${id}`);
+    const response: ApiResponse<Notice> = await apiClient.get(`/api/notices/${id}`);
 
     if (!response.success || !response.data) {
       throw new Error(response.message || 'Aviso no encontrado');
@@ -128,7 +128,7 @@ export class NoticeService {
    */
   async createNotice(noticeData: NoticeFormData): Promise<Notice> {
     const response: ApiResponse<Notice> = await apiClient.post(
-      '/notices',
+      '/api/notices',
       noticeData
     );
 
@@ -154,7 +154,7 @@ export class NoticeService {
    */
   async markAsRead(id: string): Promise<Notice> {
     const response: ApiResponse<Notice> = await apiClient.patch(
-      `/notices/${id}/read`
+      `/api/notices/${id}/read`
     );
 
     if (!response.success || !response.data) {
@@ -181,7 +181,7 @@ export class NoticeService {
    */
   async markAsUnread(id: string): Promise<Notice> {
     const response: ApiResponse<Notice> = await apiClient.patch(
-      `/notices/${id}/unread`
+      `/api/notices/${id}/unread`
     );
 
     if (!response.success || !response.data) {
@@ -208,7 +208,7 @@ export class NoticeService {
    */
   async markAllAsRead(): Promise<void> {
     const response: ApiResponse<void> = await apiClient.patch(
-      '/notices/mark-all-read'
+      '/api/notices/mark-all-read'
     );
 
     if (!response.success) {
@@ -223,7 +223,7 @@ export class NoticeService {
    */
   async deleteNotice(id: string): Promise<void> {
     const response: ApiResponse<void> = await apiClient.delete(
-      `/notices/${id}`
+      `/api/notices/${id}`
     );
 
     if (!response.success) {
@@ -279,7 +279,7 @@ export class NoticeService {
    */
   async getRecipients(): Promise<{ users: User[]; groups: any[] }> {
     const response: ApiResponse<{ users: User[]; groups: any[] }> =
-      await apiClient.get('/notices/recipients');
+      await apiClient.get('/api/notices/recipients');
 
     if (!response.success || !response.data) {
       throw new Error(response.message || 'Error al obtener los destinatarios');

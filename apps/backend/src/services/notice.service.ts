@@ -3,6 +3,7 @@ import noticeRepository, { CreateNoticeData, NoticeFilters } from '../repositori
 import groupRepository from '../repositories/group.repository';
 import userRepository from '../repositories/user.repository';
 import { PaginationParams, PaginationResult } from '../utils/pagination.util';
+import { normalizeRole } from '../utils/user.util';
 
 export interface CreateNoticeInput {
   content: string;
@@ -204,7 +205,7 @@ class NoticeService {
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,
-        role: user.role,
+        role: normalizeRole(user.role),
       })),
       groups: groups.map((group) => ({
         id: group.id,
