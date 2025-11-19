@@ -64,7 +64,9 @@ class AuthController {
 
       const result = await authService.validateToken(token);
 
-      return successResponse(res, result, 'Token is valid', 200);
+      // Return the user object directly to match the frontend ApiResponse<User>
+      // Frontend expects /api/auth/validate to return a User in response.data
+      return successResponse(res, result.user, 'Token is valid', 200);
     } catch (error: any) {
       if (error.message === 'User not found' || error.message === 'Account is deactivated') {
         return errorResponse(res, error.message, 'AUTH_1003', 401);

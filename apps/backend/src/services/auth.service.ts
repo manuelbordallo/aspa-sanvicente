@@ -83,7 +83,7 @@ class AuthService {
   /**
    * Generate new JWT from valid refresh token
    */
-  async refreshToken(refreshToken: string): Promise<{ token: string; refreshToken: string }> {
+  async refreshToken(refreshToken: string): Promise<{ token: string; refreshToken: string; user: NormalizedUser }> {
     // Verify refresh token
     const decoded = verifyToken(refreshToken);
 
@@ -111,7 +111,9 @@ class AuthService {
     return {
       token: newToken,
       refreshToken: newRefreshToken,
-    };
+      // Include normalized user so controllers can return a complete LoginResponse-like object
+      user: normalizeUser(user),
+    } as any;
   }
 
   /**
