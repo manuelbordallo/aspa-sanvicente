@@ -75,9 +75,9 @@ function createApp(): Application {
     // @ts-ignore - Type conflict between swagger-ui-express and express versions
     app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, swaggerOptions));
 
-    // Mount all routes
+    // Mount all routes under /api
     // Requirements: 1.1
-    app.use(routes);
+    app.use('/api', routes);
 
     // 404 handler for unknown routes
     // Must be placed after all route handlers

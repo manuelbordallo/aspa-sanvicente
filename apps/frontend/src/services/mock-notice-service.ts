@@ -148,6 +148,14 @@ export class MockNoticeService {
     const sortBy = options.sortBy || 'createdAt';
     const sortOrder = options.sortOrder || 'desc';
 
+    console.log('[Mock Notices] applyPagination input:', {
+      noticesCount: notices.length,
+      page,
+      limit,
+      sortBy,
+      sortOrder
+    });
+
     // Sort
     const sorted = [...notices].sort((a, b) => {
       let aVal: any, bVal: any;
@@ -167,19 +175,32 @@ export class MockNoticeService {
       }
     });
 
+    console.log('[Mock Notices] After sorting:', sorted.length, 'items');
+
     // Paginate
     const startIndex = (page - 1) * limit;
     const endIndex = startIndex + limit;
     const paginatedData = sorted.slice(startIndex, endIndex);
 
-    return {
+    console.log('[Mock Notices] Pagination:', {
+      startIndex,
+      endIndex,
+      paginatedDataLength: paginatedData.length
+    });
+
+    const result = {
       data: paginatedData,
       total: sorted.length,
       page,
       limit,
+      totalPages: Math.ceil(sorted.length / limit),
       hasNext: endIndex < sorted.length,
       hasPrev: page > 1,
     };
+
+    console.log('[Mock Notices] applyPagination result:', result);
+
+    return result;
   }
 
   /**
@@ -200,12 +221,15 @@ export class MockNoticeService {
     console.log(
       '[Mock Notices] All notices from storage:',
       allNotices.length,
-      'items'
+      'items',
+      allNotices
     );
     const filtered = this.applyFilters(allNotices, filters);
-    console.log('[Mock Notices] Filtered notices:', filtered.length, 'items');
+    console.log('[Mock Notices] Filtered notices:', filtered.length, 'items', filtered);
     const result = this.applyPagination(filtered, options);
     console.log('[Mock Notices] Returning paginated result:', result);
+    console.log('[Mock Notices] Result.data:', result.data);
+    console.log('[Mock Notices] Result.data.length:', result.data?.length);
     return result;
   }
 

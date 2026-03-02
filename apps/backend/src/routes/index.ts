@@ -22,14 +22,14 @@ router.get('/health', (_req: Request, res: Response) => {
 });
 
 /**
- * Mount all route modules under /api prefix
+ * Mount all route modules
  * Requirements: 1.1
  */
-router.use('/api/auth', authRoutes);
-router.use('/api/users', userRoutes);
-router.use('/api/news', newsRoutes);
-router.use('/api/notices', noticeRoutes);
-router.use('/api/calendar', calendarRoutes);
-router.use('/api/groups', groupRoutes);
+router.use('/auth', authRoutes);
+router.use('/users', userRoutes);
+router.use('/news', newsRoutes);
+router.use('/notices', noticeRoutes);
+router.use('/calendar', calendarRoutes);
+router.use('/groups', groupRoutes);
 
 export default router;

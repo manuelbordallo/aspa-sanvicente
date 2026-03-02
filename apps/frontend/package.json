@@ -20,7 +20,10 @@
     "deploy": "./scripts/deploy.sh",
     "deploy:msg": "./scripts/deploy.sh",
     "deploy:prod": "./scripts/build-production.sh",
-    "validate": "npm run lint && npm run format:check && npm run test && npm run build"
+    "validate": "npm run lint && npm run format:check && npm run test && npm run build",
+    "prepare": "husky",
+    "typecheck": "tsc",
+    "vitest": "vitest"
   },
   "devDependencies": {
     "@esm-bundle/chai": "^4.3.4",
@@ -34,6 +37,8 @@
     "@web/test-runner-playwright": "^0.11.0",
     "autoprefixer": "^10.4.16",
     "eslint": "^8.45.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.3.1",
     "postcss": "^8.4.31",
     "prettier": "^3.0.0",
     "tailwindcss": "^3.3.5",

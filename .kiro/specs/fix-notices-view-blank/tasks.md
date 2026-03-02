@@ -35,6 +35,6 @@
   - [x] 6.3 Agregar logs de decisión de renderizado final
   - [x] 6.4 Crear documento de pasos de diagnóstico (DIAGNOSTIC_STEPS.md)
   - [x] 6.5 Crear documento de próximos pasos (NEXT_STEPS.md)
-  - [ ] 6.6 Ejecutar la aplicación y verificar logs en la consola
-  - [ ] 6.7 Aplicar corrección específica basada en los logs observados
+  - [x] 6.6 Ejecutar la aplicación y verificar logs en la consola
+  - [x] 6.7 Aplicar corrección específica basada en los logs observados
   - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5_

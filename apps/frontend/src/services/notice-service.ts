@@ -56,6 +56,20 @@ export class NoticeService {
       throw new Error(response.message || 'Error al obtener los avisos');
     }
 
+    // Ensure data array exists before mapping
+    if (!response.data.data || !Array.isArray(response.data.data)) {
+      console.warn('[NoticeService] Invalid response structure, returning empty data');
+      return {
+        data: [],
+        total: 0,
+        page: 1,
+        limit: 10,
+        totalPages: 0,
+        hasNext: false,
+        hasPrev: false,
+      };
+    }
+
     // Convert date strings to Date objects
     response.data.data = response.data.data.map((notice) => ({
       ...notice,
@@ -257,6 +271,20 @@ export class NoticeService {
       throw new Error(
         response.message || 'Error al obtener los avisos enviados'
       );
+    }
+
+    // Ensure data array exists before mapping
+    if (!response.data.data || !Array.isArray(response.data.data)) {
+      console.warn('[NoticeService] Invalid response structure for sent notices, returning empty data');
+      return {
+        data: [],
+        total: 0,
+        page: 1,
+        limit: 10,
+        totalPages: 0,
+        hasNext: false,
+        hasPrev: false,
+      };
     }
 
     // Convert date strings to Date objects

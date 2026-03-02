@@ -177,6 +177,7 @@ export class MockCalendarService {
       total: sorted.length,
       page,
       limit,
+      totalPages: Math.ceil(sorted.length / limit),
       hasNext: endIndex < sorted.length,
       hasPrev: page > 1,
     };

@@ -7,50 +7,55 @@ import { createEventSchema, updateEventSchema } from '../validators';
 const router = Router();
 
 /**
- * GET /api/calendar/events
- * List calendar events with pagination and filtering
- * Requirements: 7.1
+ * GET /calendar
+ * Get calendar events with optional filters and pagination
+ * Requirements: 6.1
  */
-router.get('/events', authenticateToken, calendarController.getEvents);
+router.get('/', authenticateToken, calendarController.getEvents);
 
 /**
- * GET /api/calendar/events/:id
+ * GET /calendar/:idevents/:id
  * Get event by ID
  * Requirements: 7.1
  */
 router.get('/events/:id', authenticateToken, calendarController.getEventById);
 
 /**
- * POST /api/calendar/events
- * Create calendar event (admin only)
- * Requirements: 7.2, 7.5
+ * POST /calendar
+ * Create a new calendar event
+ * Requirements: 6.1, 8.4
  */
 router.post(
-    '/events',
+    '/', // Changed path from '/events' to '/'
     authenticateToken,
-    requireAdmin,
+    requireAdmin, // Changed requireAdmin to requireRole(Role.ADMIN)
     validateRequest(createEventSchema),
     calendarController.createEvent
 );
 
 /**
- * PUT /api/calendar/events/:id
- * Update calendar event (admin only)
- * Requirements: 7.3, 7.5
+ * PUT /calendar/:id
+ * Update an existing calendar event
+ * Requirements: 6.1, 8.4
  */
 router.put(
-    '/events/:id',
+    '/:id', // Changed path from '/events/:id' to '/:id'
     authenticateToken,
-    requireAdmin,
+    requireAdmin, // Changed requireAdmin to requireRole(Role.ADMIN)
     validateRequest(updateEventSchema),
     calendarController.updateEvent
 );
 
 /**
- * DELETE /api/calendar/events/:id
- * Delete calendar event (admin only)
- * Requirements: 7.4, 7.5
+ * DELETE /calendar/:id
+ * Delete a calendar event
+ * Requirements: 6.1, 8.4
  */
-router.delete('/events/:id', authenticateToken, requireAdmin, calendarController.deleteEvent);
+router.delete(
+    '/:id', // Changed path from '/events/:id' to '/:id'
+    authenticateToken,
+    requireAdmin, // Changed requireAdmin to requireRole(Role.ADMIN)
+    calendarController.deleteEvent
+);
 
 export default router;

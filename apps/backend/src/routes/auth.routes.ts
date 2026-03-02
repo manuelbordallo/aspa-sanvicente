@@ -13,21 +13,21 @@ import { updateProfileSchema } from '../validators';
 const router = Router();
 
 /**
- * POST /api/auth/login
+ * POST /auth/login
  * Login with email and password
  * Requirements: 2.1, 2.6
  */
 router.post('/login', validateRequest(loginSchema), authController.login);
 
 /**
- * POST /api/auth/logout
+ * POST /auth/logout
  * Logout (optional server-side tracking)
  * Requirements: 2.7
  */
 router.post('/logout', authenticateToken, authController.logout);
 
 /**
- * POST /api/auth/refresh
+ * POST /auth/refresh
  * Refresh JWT token
  * Requirements: 2.6
  * Note: Does not require authenticateToken middleware as it uses refresh token
@@ -35,14 +35,14 @@ router.post('/logout', authenticateToken, authController.logout);
 router.post('/refresh', authController.refreshToken);
 
 /**
- * GET /api/auth/validate
+ * GET /auth/validate
  * Validate current token and return user info
  * Requirements: 2.7
  */
 router.get('/validate', authenticateToken, authController.validateToken);
 
 /**
- * POST /api/auth/forgot-password
+ * POST /auth/forgot-password
  * Request password reset
  * Requirements: 11.1
  */
@@ -53,7 +53,7 @@ router.post(
 );
 
 /**
- * POST /api/auth/reset-password
+ * POST /auth/reset-password
  * Reset password with token
  * Requirements: 11.3
  */
@@ -64,7 +64,7 @@ router.post(
 );
 
 /**
- * POST /api/auth/change-password
+ * POST /auth/change-password
  * Change password for authenticated user
  * Requirements: 4.3, 4.4
  */
@@ -76,7 +76,7 @@ router.post(
 );
 
 /**
- * GET /api/auth/profile
+ * GET /auth/profile
  * Get current user profile
  * Requirements: 4.1
  */

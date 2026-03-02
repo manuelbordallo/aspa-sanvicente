@@ -93,9 +93,13 @@ class AuthServiceFactory {
       console.warn(
         '[AuthServiceFactory] Service not initialized, using mock service as fallback'
       );
+      console.trace('[AuthServiceFactory] getAuthServiceSync fallback trace:');
       return mockAuthService;
     }
 
+    console.log('[AuthServiceFactory] getAuthServiceSync returning:',
+      this.mockMode ? 'MockAuthService' : 'RealAuthService',
+      'initialized:', this.initialized);
     return this.serviceInstance;
   }
 

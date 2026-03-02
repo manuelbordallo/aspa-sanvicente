@@ -17,13 +17,27 @@ export interface AuthState {
 }
 
 export class AuthService {
-  private currentUser: User | null = null;
+  private _currentUser: User | null = null;
   private authStateListeners: ((state: AuthState) => void)[] = [];
   private tokenRefreshTimer: number | null = null;
+  private instanceId: string;
+
+  private get currentUser(): User | null {
+    return this._currentUser;
+  }
+
+  private set currentUser(value: User | null) {
+    console.log('[AuthService] currentUser setter called, instanceId:', this.instanceId, 'old:', this._currentUser?.email, 'new:', value?.email);
+    console.trace('[AuthService] currentUser setter trace:');
+    this._currentUser = value;
+  }
 
   constructor() {
+    this.instanceId = `AuthService-${Math.random().toString(36).substr(2, 9)}`;
+    console.log('[AuthService] Constructor called, instanceId:', this.instanceId);
     this.initializeAuth();
     this.setupEventListeners();
+    console.log('[AuthService] Constructor complete, instanceId:', this.instanceId, 'currentUser:', this.currentUser);
   }
 
   /**
@@ -33,14 +47,24 @@ export class AuthService {
     const token = localStorage.getItem(config.auth.tokenKey);
     const userStr = localStorage.getItem('auth_user');
 
+    console.log('[AuthService] initializeAuth called:', {
+      hasToken: !!token,
+      hasUserStr: !!userStr,
+      tokenKey: config.auth.tokenKey,
+      userStr: userStr?.substring(0, 100)
+    });
+
     if (token && userStr) {
       try {
-        this.currentUser = JSON.parse(userStr);
+        this.currentUser = JSON.parse(userStr)?.user;
+        console.log('[AuthService] User loaded from localStorage:', this.currentUser);
         this.scheduleTokenRefresh();
       } catch (error) {
-        console.error('Error parsing stored user data:', error);
+        console.error('[AuthService] Error parsing stored user data:', error);
         this.clearAuthData();
       }
+    } else {
+      console.log('[AuthService] No stored auth data found');
     }
   }
 
@@ -70,8 +94,21 @@ export class AuthService {
    * Add listener for auth state changes
    */
   addAuthStateListener(listener: (state: AuthState) => void): void {
-    console.log('[AuthService] Adding auth state listener, total listeners:', this.authStateListeners.length + 1);
+    console.log('[AuthService] Adding auth state listener, instanceId:', this.instanceId, 'total listeners:', this.authStateListeners.length + 1);
     this.authStateListeners.push(listener);
+
+    // Immediately notify the new listener of the current state
+    const currentState: AuthState = {
+      user: this.currentUser,
+      isAuthenticated: this.isAuthenticated(),
+      isLoading: false,
+      error: null,
+    };
+    console.log('[AuthService] Notifying new listener of current state, instanceId:', this.instanceId, {
+      user: currentState.user?.email,
+      isAuthenticated: currentState.isAuthenticated
+    });
+    listener(currentState);
   }
 
   /**
@@ -98,12 +135,14 @@ export class AuthService {
       error,
     };
 
-    console.log('[AuthService] Notifying auth state change:', {
+    console.log('[AuthService] Notifying auth state change, instanceId:', this.instanceId, {
       isAuthenticated: state.isAuthenticated,
       isLoading: state.isLoading,
       user: state.user?.email,
+      currentUser: this.currentUser?.email,
       listenersCount: this.authStateListeners.length
     });
+    console.trace('[AuthService] notifyAuthStateChange called from:');
 
     this.authStateListeners.forEach((listener) => listener(state));
   }
@@ -144,8 +183,11 @@ export class AuthService {
         localStorage.setItem('auth_refresh_token', refreshToken);
       }
 
+      console.log('[AuthService] Login successful, user:', user);
       this.currentUser = user;
+      console.log('[AuthService] currentUser set to:', this.currentUser);
       this.scheduleTokenRefresh();
+      console.log('[AuthService] About to notify auth state change after login');
       this.notifyAuthStateChange();
 
       return user;
@@ -178,6 +220,8 @@ export class AuthService {
    * Handle logout (clear local data and notify listeners)
    */
   private handleLogout(): void {
+    console.log('[AuthService] handleLogout called');
+    console.trace('[AuthService] handleLogout trace:');
     this.clearAuthData();
     this.currentUser = null;
 
@@ -262,6 +306,8 @@ export class AuthService {
     try {
       const response: ApiResponse<User> = await apiClient.get('/api/auth/validate');
 
+      console.log('[AuthService] validateToken response:', response);
+
       if (response.success && response.data) {
         // Update user data if it changed
         this.currentUser = response.data;
@@ -270,10 +316,16 @@ export class AuthService {
         return true;
       }
 
+      // If validation fails but we have a valid token and user in localStorage,
+      // don't logout - just return false
+      console.warn('[AuthService] Token validation returned invalid response, keeping current user');
       return false;
     } catch (error) {
       console.error('Token validation failed:', error);
-      this.handleLogout();
+      // Only logout on network errors or 401/403
+      if (error instanceof Error && (error.message.includes('401') || error.message.includes('403'))) {
+        this.handleLogout();
+      }
       return false;
     }
   }

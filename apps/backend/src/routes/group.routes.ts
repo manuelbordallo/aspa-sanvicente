@@ -7,21 +7,14 @@ import { createGroupSchema, updateGroupSchema } from '../validators';
 const router = Router();
 
 /**
- * GET /api/groups
- * List all groups (admin only)
- * Requirements: 10.2
- */
-router.get('/', authenticateToken, requireAdmin, groupController.getGroups);
-
-/**
- * GET /api/groups/:id
+ * GET /groups/:id
  * Get group by ID (admin only)
  * Requirements: 10.2
  */
 router.get('/:id', authenticateToken, requireAdmin, groupController.getGroupById);
 
 /**
- * POST /api/groups
+ * POST /groups
  * Create group (admin only)
  * Requirements: 10.1
  */
@@ -34,7 +27,7 @@ router.post(
 );
 
 /**
- * PUT /api/groups/:id
+ * PUT /groups/:id
  * Update group (admin only)
  * Requirements: 10.3
  */
@@ -47,7 +40,7 @@ router.put(
 );
 
 /**
- * DELETE /api/groups/:id
+ * DELETE /groups/:id
  * Delete group (admin only)
  * Requirements: 10.4
  */
